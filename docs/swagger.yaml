@@ -1,0 +1,455 @@
+basePath: /api/v1
+definitions:
+  models.CumulativeResponse:
+    properties:
+      revenue:
+        type: number
+      transactions:
+        type: integer
+    type: object
+  models.DailyTransactionStats:
+    properties:
+      total_amount:
+        type: number
+      total_failed_amount:
+        type: number
+      total_successful_amount:
+        type: number
+    type: object
+  models.ExpectedTransactionRequest:
+    properties:
+      revenue:
+        type: number
+      transactions:
+        type: integer
+    required:
+    - revenue
+    - transactions
+    type: object
+  models.GeneralReportResponse:
+    properties:
+      cumulative:
+        properties:
+          actual:
+            $ref: '#/definitions/models.CumulativeResponse'
+          expected:
+            $ref: '#/definitions/models.CumulativeResponse'
+        type: object
+      current:
+        properties:
+          actual:
+            $ref: '#/definitions/models.CumulativeResponse'
+        type: object
+      previous:
+        properties:
+          total:
+            $ref: '#/definitions/models.CumulativeResponse'
+        type: object
+      telecoms:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+    type: object
+  models.MonthlyReportItem:
+    properties:
+      actual:
+        $ref: '#/definitions/models.ReportItemDetails'
+      expected:
+        $ref: '#/definitions/models.ReportItemDetails'
+      title:
+        description: Month name (e.g., "Jan")
+        type: string
+    type: object
+  models.RecentTransaction:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      phone_number:
+        type: string
+      status:
+        type: string
+    type: object
+  models.ReportItemDetails:
+    properties:
+      revenue:
+        type: number
+      transactions:
+        type: integer
+    type: object
+  models.TopTenTransactionResponse:
+    properties:
+      amount:
+        type: number
+      count:
+        type: integer
+      phone_number:
+        type: string
+    type: object
+  models.TransactionReportResponse:
+    properties:
+      total_transaction:
+        properties:
+          cumulative:
+            properties:
+              revenue:
+                type: number
+              transaction:
+                type: integer
+            type: object
+          current:
+            properties:
+              revenue:
+                type: number
+              transaction:
+                type: integer
+            type: object
+        type: object
+      unique:
+        properties:
+          cumulative:
+            properties:
+              uniqueHits:
+                type: integer
+            type: object
+          current:
+            properties:
+              uniqueHits:
+                type: integer
+            type: object
+        type: object
+    type: object
+  models.WeeklyReportItem:
+    properties:
+      actual:
+        $ref: '#/definitions/models.ReportItemDetails'
+      expected:
+        $ref: '#/definitions/models.ReportItemDetails'
+      title:
+        description: Week description (e.g., "Week Jan 1")
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: A backend service written in Go with Gin framework
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: LONDONWINNER
+  version: "1.0"
+paths:
+  /report/daily-transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transaction statistics for the current day
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.DailyTransactionStats'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get daily transaction statistics
+      tags:
+      - reports
+  /report/daily-transactions-report:
+    get:
+      responses: {}
+      tags:
+      - reports
+  /report/draw:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - Bearer: []
+      summary: Get daily transaction report
+      tags:
+      - reports
+  /report/expected-transaction:
+    post:
+      consumes:
+      - application/json
+      description: Stores expected revenue and transaction count
+      parameters:
+      - description: Expected Transaction Data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExpectedTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Add an expected transaction
+      tags:
+      - reports
+  /report/general:
+    get:
+      consumes:
+      - application/json
+      description: Generate a general report for the given date range
+      parameters:
+      - description: From date (YYYY-MM-DD)
+        in: query
+        name: fromDate
+        required: true
+        type: string
+      - description: To date (YYYY-MM-DD)
+        in: query
+        name: toDate
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.GeneralReportResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Generate general report
+      tags:
+      - reports
+  /report/hourly-transaction-report:
+    get:
+      responses: {}
+      tags:
+      - reports
+  /report/monthly:
+    get:
+      consumes:
+      - application/json
+      description: Generate revenue and transaction statistics grouped by month
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MonthlyReportItem'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Generate monthly report
+      tags:
+      - reports
+  /report/monthly-transaction-report:
+    get:
+      responses: {}
+      tags:
+      - reports
+  /report/top-ten:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the top 10 transactions based on total transaction amount
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TopTenTransactionResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get top 10 transactions
+      tags:
+      - reports
+  /report/top-ten/recent:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the top 10 most recent successful transactions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.RecentTransaction'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Get top 10 recent successful transactions
+      tags:
+      - reports
+  /report/transaction:
+    get:
+      consumes:
+      - application/json
+      description: Generate a transaction report for the given date range, optionally
+        filtered by product ID and status
+      parameters:
+      - description: From date (YYYY-MM-DD)
+        in: query
+        name: fromDate
+        required: true
+        type: string
+      - description: To date (YYYY-MM-DD)
+        in: query
+        name: toDate
+        required: true
+        type: string
+      - description: Product ID
+        in: query
+        name: productId
+        type: string
+      - description: Transaction status (PENDING, FAILED, SUCCESS)
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TransactionReportResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Generate transaction report
+      tags:
+      - reports
+  /report/weekly:
+    get:
+      consumes:
+      - application/json
+      description: Generate revenue and transaction statistics grouped by week
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.WeeklyReportItem'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - Bearer: []
+      summary: Generate weekly report
+      tags:
+      - reports
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -1,0 +1,47 @@
+name: Deployment Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Deploy Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Variables
+        id: vars
+        run: |
+          echo "##[set-output name=commit;]$(echo $GITHUB_SHA | head -c7)"
+      - name: Log In to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: sjiaire
+          password: jJIZP534sOgb
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and Push
+        id: build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          push: true
+          tags: sjiaire/vuna-deile:go-user-service-${{ steps.vars.outputs.commit }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      - name: Move Cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
