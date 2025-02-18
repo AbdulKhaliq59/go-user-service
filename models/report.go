@@ -155,24 +155,61 @@ type Report struct {
 }
 
 type DailyTransactionReport struct {
-	TrxDate               string  `json:"trx_date"`
-	TotalSuccessfulAmount float64 `json:"tot_successful_trx_amount"`
-	TotalPendingAmount    float64 `json:"tot_pending_trx_amount"`
-	TotalFailedAmount     float64 `json:"tot_failed_trx_amount"`
+	TrxDate                     time.Time `json:"trx_date"`
+	TotSuccessfulTrxAmount      float64   `json:"tot_successful_trx_amount"`
+	TotSuccessfulTrxCount       int64     `json:"tot_successful_trx_count"`
+	TotSuccessfulTrxUniqueCount int64     `json:"tot_successful_trx_unique_count"`
+	TotPendingTrxAmount         float64   `json:"tot_pending_trx_amount"`
+	TotPendingTrxCount          int64     `json:"tot_pending_trx_count"`
+	TotPendingTrxUniqueCount    int64     `json:"tot_pending_trx_unique_count"`
+	TotFailedTrxAmount          float64   `json:"tot_failed_trx_amount"`
+	TotFailedTrxCount           int64     `json:"tot_failed_trx_count"`
+	TotFailedTrxUniqueCount     int64     `json:"tot_failed_trx_unique_count"`
 }
 
 type MonthlyTransactionReport struct {
-	Year                  int     `json:"year"`
-	Month                 string  `json:"month"`
-	TotalSuccessfulAmount float64 `json:"tot_successful_trx_amount"`
+	TrxYear                     int     `json:"trx_year"`
+	TrxMonth                    string  `json:"trx_month"`
+	TotSuccessfulTrxAmount      float64 `json:"tot_successful_trx_amount"`
+	TotSuccessfulTrxCount       int64   `json:"tot_successful_trx_count"`
+	TotSuccessfulTrxUniqueCount int64   `json:"tot_successful_trx_unique_count"`
+	TotPendingTrxAmount         float64 `json:"tot_pending_trx_amount"`
+	TotPendingTrxCount          int64   `json:"tot_pending_trx_count"`
+	TotPendingTrxUniqueCount    int64   `json:"tot_pending_trx_unique_count"`
+	TotFailedTrxAmount          float64 `json:"tot_failed_trx_amount"`
+	TotFailedTrxCount           int64   `json:"tot_failed_trx_count"`
+	TotFailedTrxUniqueCount     int64   `json:"tot_failed_trx_unique_count"`
 }
 
 type HourlyTransactionReport struct {
-	TrxDate       string  `json:"trx_date"`
-	Hour          string  `json:"hour"`
-	SuccessfulAmt float64 `json:"tot_successful_trx_amount"`
-	PendingAmt    float64 `json:"tot_pending_trx_amount"`
-	FailedAmt     float64 `json:"tot_failed_trx_amount"`
+	TrxDate                     time.Time `json:"trx_date"`
+	Hour                        string    `json:"hour"`
+	TotSuccessfulTrxAmount      float64   `json:"tot_successful_trx_amount"`
+	TotSuccessfulTrxCount       int64     `json:"tot_successful_trx_count"`
+	TotSuccessfulTrxUniqueCount int64     `json:"tot_successful_trx_unique_count"`
+	TotPendingTrxAmount         float64   `json:"tot_pending_trx_amount"`
+	TotPendingTrxCount          int64     `json:"tot_pending_trx_count"`
+	TotPendingTrxUniqueCount    int64     `json:"tot_pending_trx_unique_count"`
+	TotFailedTrxAmount          float64   `json:"tot_failed_trx_amount"`
+	TotFailedTrxCount           int64     `json:"tot_failed_trx_count"`
+	TotFailedTrxUniqueCount     int64     `json:"tot_failed_trx_unique_count"`
+}
+type ProductTransactionReport struct {
+	TrxDate                     string  `json:"trx_date,omitempty"`
+	TrxYear                     int     `json:"trx_year,omitempty"`
+	TrxMonth                    string  `json:"trx_month,omitempty"`
+	ProductName                 string  `json:"product_name"`
+	ProductPlayedAmount         float64 `json:"product_played_amount"`
+	Hour                        string  `json:"hour,omitempty"`
+	TotSuccessfulTrxAmount      float64 `json:"tot_successful_trx_amount"`
+	TotSuccessfulTrxCount       int64   `json:"tot_successful_trx_count"`
+	TotSuccessfulTrxUniqueCount int64   `json:"tot_successful_trx_unique_count"`
+	TotPendingTrxAmount         float64 `json:"tot_pending_trx_amount"`
+	TotPendingTrxCount          int64   `json:"tot_pending_trx_count"`
+	TotPendingTrxUniqueCount    int64   `json:"tot_pending_trx_unique_count"`
+	TotFailedTrxAmount          float64 `json:"tot_failed_trx_amount"`
+	TotFailedTrxCount           int64   `json:"tot_failed_trx_count"`
+	TotFailedTrxUniqueCount     int64   `json:"tot_failed_trx_unique_count"`
 }
 
 type PaginationResponse struct {

@@ -24,6 +24,22 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/report/daily-transaction-report": {
+            "get": {
+                "description": "Get detailed daily transaction report for the last 30 days",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get daily transaction report",
+                "responses": {}
+            }
+        },
         "/report/daily-transactions": {
             "get": {
                 "security": [
@@ -39,16 +55,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Get daily transaction statistics",
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.DailyTransactionStats"
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -59,14 +69,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/report/daily-transactions-report": {
-            "get": {
-                "tags": [
-                    "reports"
-                ],
-                "responses": {}
             }
         },
         "/report/draw": {
@@ -83,7 +85,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Get daily transaction report",
                 "responses": {}
@@ -104,7 +106,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Add an expected transaction",
                 "parameters": [
@@ -164,7 +166,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Generate general report",
                 "parameters": [
@@ -184,12 +186,6 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.GeneralReportResponse"
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -222,8 +218,25 @@ const docTemplate = `{
         },
         "/report/hourly-transaction-report": {
             "get": {
+                "description": "Get detailed hourly transaction report for a specific date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
-                    "reports"
+                    "Report"
+                ],
+                "summary": "Get hourly transaction report",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Date in YYYY-MM-DD format",
+                        "name": "date",
+                        "in": "query",
+                        "required": true
+                    }
                 ],
                 "responses": {}
             }
@@ -243,19 +256,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Generate monthly report",
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.MonthlyReportItem"
-                            }
-                        }
-                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -279,8 +283,118 @@ const docTemplate = `{
         },
         "/report/monthly-transaction-report": {
             "get": {
+                "description": "Get detailed monthly transaction report for the last 12 months",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
-                    "reports"
+                    "Report"
+                ],
+                "summary": "Get monthly transaction report",
+                "responses": {}
+            }
+        },
+        "/report/product-daily-transaction-report": {
+            "get": {
+                "description": "Get detailed daily transaction report filtered by product and date",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get daily transaction report by product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID (UUID)",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Date (YYYY-MM-DD)",
+                        "name": "date",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/report/product-hourly-transaction-report": {
+            "get": {
+                "description": "Get detailed hourly transaction report filtered by product and date range",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get hourly transaction report by product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID (UUID)",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Date (YYYY-MM-DD)",
+                        "name": "date",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "From Date (YYYY-MM-DD HH:mm:ss)",
+                        "name": "fromDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "To Date (YYYY-MM-DD HH:mm:ss)",
+                        "name": "toDate",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Order by clause (e.g., tot_successful_trx_amount DESC)",
+                        "name": "orderBy",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/report/product-monthly-transaction-report": {
+            "get": {
+                "description": "Get detailed monthly transaction report filtered by product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Report"
+                ],
+                "summary": "Get monthly transaction report by product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID (UUID)",
+                        "name": "productId",
+                        "in": "query"
+                    }
                 ],
                 "responses": {}
             }
@@ -300,19 +414,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Get top 10 transactions",
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.TopTenTransactionResponse"
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -340,19 +445,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Get top 10 recent successful transactions",
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.RecentTransaction"
-                            }
-                        }
-                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -380,7 +476,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Generate transaction report",
                 "parameters": [
@@ -412,12 +508,6 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.TransactionReportResponse"
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -463,19 +553,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "reports"
+                    "Report"
                 ],
                 "summary": "Generate weekly report",
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.WeeklyReportItem"
-                            }
-                        }
-                    },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
@@ -499,31 +580,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "models.CumulativeResponse": {
-            "type": "object",
-            "properties": {
-                "revenue": {
-                    "type": "number"
-                },
-                "transactions": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.DailyTransactionStats": {
-            "type": "object",
-            "properties": {
-                "total_amount": {
-                    "type": "number"
-                },
-                "total_failed_amount": {
-                    "type": "number"
-                },
-                "total_successful_amount": {
-                    "type": "number"
-                }
-            }
-        },
         "models.ExpectedTransactionRequest": {
             "type": "object",
             "required": [
@@ -536,170 +592,6 @@ const docTemplate = `{
                 },
                 "transactions": {
                     "type": "integer"
-                }
-            }
-        },
-        "models.GeneralReportResponse": {
-            "type": "object",
-            "properties": {
-                "cumulative": {
-                    "type": "object",
-                    "properties": {
-                        "actual": {
-                            "$ref": "#/definitions/models.CumulativeResponse"
-                        },
-                        "expected": {
-                            "$ref": "#/definitions/models.CumulativeResponse"
-                        }
-                    }
-                },
-                "current": {
-                    "type": "object",
-                    "properties": {
-                        "actual": {
-                            "$ref": "#/definitions/models.CumulativeResponse"
-                        }
-                    }
-                },
-                "previous": {
-                    "type": "object",
-                    "properties": {
-                        "total": {
-                            "$ref": "#/definitions/models.CumulativeResponse"
-                        }
-                    }
-                },
-                "telecoms": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "additionalProperties": true
-                    }
-                }
-            }
-        },
-        "models.MonthlyReportItem": {
-            "type": "object",
-            "properties": {
-                "actual": {
-                    "$ref": "#/definitions/models.ReportItemDetails"
-                },
-                "expected": {
-                    "$ref": "#/definitions/models.ReportItemDetails"
-                },
-                "title": {
-                    "description": "Month name (e.g., \"Jan\")",
-                    "type": "string"
-                }
-            }
-        },
-        "models.RecentTransaction": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "phone_number": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.ReportItemDetails": {
-            "type": "object",
-            "properties": {
-                "revenue": {
-                    "type": "number"
-                },
-                "transactions": {
-                    "type": "integer"
-                }
-            }
-        },
-        "models.TopTenTransactionResponse": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "count": {
-                    "type": "integer"
-                },
-                "phone_number": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.TransactionReportResponse": {
-            "type": "object",
-            "properties": {
-                "total_transaction": {
-                    "type": "object",
-                    "properties": {
-                        "cumulative": {
-                            "type": "object",
-                            "properties": {
-                                "revenue": {
-                                    "type": "number"
-                                },
-                                "transaction": {
-                                    "type": "integer"
-                                }
-                            }
-                        },
-                        "current": {
-                            "type": "object",
-                            "properties": {
-                                "revenue": {
-                                    "type": "number"
-                                },
-                                "transaction": {
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
-                },
-                "unique": {
-                    "type": "object",
-                    "properties": {
-                        "cumulative": {
-                            "type": "object",
-                            "properties": {
-                                "uniqueHits": {
-                                    "type": "integer"
-                                }
-                            }
-                        },
-                        "current": {
-                            "type": "object",
-                            "properties": {
-                                "uniqueHits": {
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "models.WeeklyReportItem": {
-            "type": "object",
-            "properties": {
-                "actual": {
-                    "$ref": "#/definitions/models.ReportItemDetails"
-                },
-                "expected": {
-                    "$ref": "#/definitions/models.ReportItemDetails"
-                },
-                "title": {
-                    "description": "Week description (e.g., \"Week Jan 1\")",
-                    "type": "string"
                 }
             }
         }

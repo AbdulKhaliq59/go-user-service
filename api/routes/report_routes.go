@@ -10,17 +10,14 @@ import (
 	"gorm.io/gorm"
 )
 
-// SetupReportRoutes configures report-related routes
 func SetupReportRoutes(router *gin.RouterGroup, db *gorm.DB) {
 	// Initialize repository, service, and controller
 	reportRepo := repository.NewReportRepository(db)
 	reportService := services.NewReportService(reportRepo)
 	reportController := controllers.NewReportController(reportService)
 
-	// Create report routes group
 	reportRoutes := router.Group("/report")
 	{
-		// Apply role-based middleware
 		reportRoutes.GET("/general", reportController.GeneralReport)
 		reportRoutes.GET("/transaction", reportController.TransactionReport)
 		reportRoutes.GET("/monthly", reportController.MonthlyReport)

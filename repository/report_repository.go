@@ -401,15 +401,27 @@ func (r *ReportRepository) GetDailyTransactionStatistics() (models.DailyTransact
 
 func (r *ReportRepository) GetDailyTransactionReport() ([]models.DailyTransactionReport, error) {
 	var report []models.DailyTransactionReport
+
 	query := `
-        SELECT DATE(created_at) AS trx_date,
+        SELECT TO_CHAR(DATE(created_at), 'YYYY-MM-DD')::DATE AS trx_date,
                SUM(CASE WHEN status = 'SUCCESS' THEN final_amount ELSE 0 END) AS tot_successful_trx_amount,
+               COUNT(CASE WHEN status = 'SUCCESS' THEN 1 END) AS tot_successful_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'SUCCESS' THEN phone_number END) AS tot_successful_trx_unique_count,
+               
                SUM(CASE WHEN status = 'PENDING' THEN final_amount ELSE 0 END) AS tot_pending_trx_amount,
-               SUM(CASE WHEN status = 'FAILED' THEN final_amount ELSE 0 END) AS tot_failed_trx_amount
+               COUNT(CASE WHEN status = 'PENDING' THEN 1 END) AS tot_pending_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'PENDING' THEN phone_number END) AS tot_pending_trx_unique_count,
+               
+               SUM(CASE WHEN status = 'FAILED' THEN final_amount ELSE 0 END) AS tot_failed_trx_amount,
+               COUNT(CASE WHEN status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'FAILED' THEN phone_number END) AS tot_failed_trx_unique_count
+               
         FROM transactions_new
+        WHERE created_at > CURRENT_DATE - INTERVAL '30 days'  -- You can adjust the date range as needed
         GROUP BY DATE(created_at)
         ORDER BY DATE(created_at) DESC;
     `
+
 	err := r.DB.Raw(query).Scan(&report).Error
 	return report, err
 }
@@ -417,32 +429,177 @@ func (r *ReportRepository) GetDailyTransactionReport() ([]models.DailyTransactio
 // Get Monthly Transaction Report
 func (r *ReportRepository) GetMonthlyTransactionReport() ([]models.MonthlyTransactionReport, error) {
 	var report []models.MonthlyTransactionReport
+
 	query := `
-        SELECT EXTRACT(YEAR FROM created_at) AS year,
-               TO_CHAR(created_at, 'FMMonth') AS month,
-               SUM(CASE WHEN status = 'SUCCESS' THEN final_amount ELSE 0 END) AS tot_successful_trx_amount
+        SELECT EXTRACT(YEAR FROM created_at) AS trx_year,
+               TO_CHAR(created_at, 'FMMonth') AS trx_month,
+               
+               SUM(CASE WHEN status = 'SUCCESS' THEN final_amount ELSE 0 END) AS tot_successful_trx_amount,
+               COUNT(CASE WHEN status = 'SUCCESS' THEN 1 END) AS tot_successful_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'SUCCESS' THEN phone_number END) AS tot_successful_trx_unique_count,
+               
+               SUM(CASE WHEN status = 'PENDING' THEN final_amount ELSE 0 END) AS tot_pending_trx_amount,
+               COUNT(CASE WHEN status = 'PENDING' THEN 1 END) AS tot_pending_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'PENDING' THEN phone_number END) AS tot_pending_trx_unique_count,
+               
+               SUM(CASE WHEN status = 'FAILED' THEN final_amount ELSE 0 END) AS tot_failed_trx_amount,
+               COUNT(CASE WHEN status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'FAILED' THEN phone_number END) AS tot_failed_trx_unique_count
+               
         FROM transactions_new
-        GROUP BY year, month
-        ORDER BY year DESC, month DESC;
+        WHERE created_at > CURRENT_DATE - INTERVAL '12 months'  -- You can adjust the date range as needed
+        GROUP BY EXTRACT(YEAR FROM created_at), 
+                 EXTRACT(MONTH FROM created_at),
+                 TO_CHAR(created_at, 'FMMonth')
+        ORDER BY EXTRACT(YEAR FROM created_at) DESC, 
+                 EXTRACT(MONTH FROM created_at) DESC;
     `
+
 	err := r.DB.Raw(query).Scan(&report).Error
 	return report, err
 }
 
 // Get Hourly Transaction Report
-func (r *ReportRepository) GetHourlyTransactionReport() ([]models.HourlyTransactionReport, error) {
+func (r *ReportRepository) GetHourlyTransactionReport(date string) ([]models.HourlyTransactionReport, error) {
 	var report []models.HourlyTransactionReport
+
 	query := `
-        SELECT DATE(created_at) AS trx_date,
+        SELECT TO_CHAR(DATE(created_at), 'YYYY-MM-DD')::DATE AS trx_date,
                TO_CHAR(EXTRACT(HOUR FROM created_at), 'FM00') || ':00 - ' ||
                TO_CHAR(EXTRACT(HOUR FROM created_at) + 1, 'FM00') || ':00' AS hour,
+               
                SUM(CASE WHEN status = 'SUCCESS' THEN final_amount ELSE 0 END) AS tot_successful_trx_amount,
+               COUNT(CASE WHEN status = 'SUCCESS' THEN 1 END) AS tot_successful_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'SUCCESS' THEN phone_number END) AS tot_successful_trx_unique_count,
+               
                SUM(CASE WHEN status = 'PENDING' THEN final_amount ELSE 0 END) AS tot_pending_trx_amount,
-               SUM(CASE WHEN status = 'FAILED' THEN final_amount ELSE 0 END) AS tot_failed_trx_amount
+               COUNT(CASE WHEN status = 'PENDING' THEN 1 END) AS tot_pending_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'PENDING' THEN phone_number END) AS tot_pending_trx_unique_count,
+               
+               SUM(CASE WHEN status = 'FAILED' THEN final_amount ELSE 0 END) AS tot_failed_trx_amount,
+               COUNT(CASE WHEN status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
+               COUNT(DISTINCT CASE WHEN status = 'FAILED' THEN phone_number END) AS tot_failed_trx_unique_count
+               
         FROM transactions_new
-        GROUP BY trx_date, hour
-        ORDER BY trx_date DESC, hour DESC;
+        WHERE DATE(created_at) = $1
+        GROUP BY DATE(created_at), EXTRACT(HOUR FROM created_at)
+        ORDER BY DATE(created_at), EXTRACT(HOUR FROM created_at) DESC;
     `
-	err := r.DB.Raw(query).Scan(&report).Error
+
+	err := r.DB.Raw(query, date).Scan(&report).Error
+	return report, err
+}
+
+func (r *ReportRepository) GetProductMonthlyReport(productID string) ([]models.ProductTransactionReport, error) {
+	var report []models.ProductTransactionReport
+
+	query := `
+        SELECT EXTRACT(YEAR FROM t.created_at) AS trx_year,
+               TO_CHAR(t.created_at, 'FMMonth') AS trx_month,
+               p.product_name AS product_name,
+               p.play_amount AS product_played_amount,
+               
+               SUM(CASE WHEN t.status = 'SUCCESS' THEN t.final_amount ELSE 0 END) AS tot_successful_trx_amount,
+               COUNT(CASE WHEN t.status = 'SUCCESS' THEN 1 END) AS tot_successful_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'SUCCESS' THEN t.phone_number END) AS tot_successful_trx_unique_count,
+               
+               SUM(CASE WHEN t.status = 'PENDING' THEN t.final_amount ELSE 0 END) AS tot_pending_trx_amount,
+               COUNT(CASE WHEN t.status = 'PENDING' THEN 1 END) AS tot_pending_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'PENDING' THEN t.phone_number END) AS tot_pending_trx_unique_count,
+               
+               SUM(CASE WHEN t.status = 'FAILED' THEN t.final_amount ELSE 0 END) AS tot_failed_trx_amount,
+               COUNT(CASE WHEN t.status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'FAILED' THEN t.phone_number END) AS tot_failed_trx_unique_count
+               
+        FROM transactions_new t
+        LEFT JOIN products p ON t.product_id = p.product_id
+        WHERE ($1::UUID IS NULL OR t.product_id = $1::UUID)
+        GROUP BY EXTRACT(YEAR FROM t.created_at),
+                 EXTRACT(MONTH FROM t.created_at),
+                 TO_CHAR(t.created_at, 'FMMonth'),
+                 p.product_name,
+                 p.play_amount
+        ORDER BY EXTRACT(YEAR FROM t.created_at) DESC,
+                 EXTRACT(MONTH FROM t.created_at) DESC
+    `
+
+	err := r.DB.Raw(query, productID).Scan(&report).Error
+	return report, err
+}
+
+func (r *ReportRepository) GetProductDailyReport(productID, date string) ([]models.ProductTransactionReport, error) {
+	var report []models.ProductTransactionReport
+
+	query := `
+        SELECT TO_CHAR(t.created_at, 'YYYY-MM-DD') AS trx_date,
+               p.product_name AS product_name,
+               p.play_amount AS product_played_amount,
+               
+               SUM(CASE WHEN t.status = 'SUCCESS' THEN t.final_amount ELSE 0 END) AS tot_successful_trx_amount,
+               COUNT(CASE WHEN t.status = 'SUCCESS' THEN 1 END) AS tot_successful_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'SUCCESS' THEN t.phone_number END) AS tot_successful_trx_unique_count,
+               
+               SUM(CASE WHEN t.status = 'PENDING' THEN t.final_amount ELSE 0 END) AS tot_pending_trx_amount,
+               COUNT(CASE WHEN t.status = 'PENDING' THEN 1 END) AS tot_pending_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'PENDING' THEN t.phone_number END) AS tot_pending_trx_unique_count,
+               
+               SUM(CASE WHEN t.status = 'FAILED' THEN t.final_amount ELSE 0 END) AS tot_failed_trx_amount,
+               COUNT(CASE WHEN t.status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'FAILED' THEN t.phone_number END) AS tot_failed_trx_unique_count
+               
+        FROM transactions_new t
+        LEFT JOIN products p ON t.product_id = p.product_id
+        WHERE ($1::UUID IS NULL OR t.product_id = $1::UUID)
+        AND ($2::DATE IS NULL OR t.created_at::DATE = $2::DATE)
+        GROUP BY TO_CHAR(t.created_at, 'YYYY-MM-DD'),
+                 p.product_name,
+                 p.play_amount
+        ORDER BY trx_date DESC
+    `
+
+	err := r.DB.Raw(query, productID, date).Scan(&report).Error
+	return report, err
+}
+
+func (r *ReportRepository) GetProductHourlyReport(productID, date, fromDate, toDate, orderBy string) ([]models.ProductTransactionReport, error) {
+	var report []models.ProductTransactionReport
+
+	defaultOrderBy := "trx_date, hour DESC"
+	orderClause := defaultOrderBy
+	if orderBy != "" {
+		orderClause = orderBy
+	}
+
+	query := `
+        SELECT TO_CHAR(t.created_at, 'YYYY-MM-DD') AS trx_date,
+               p.product_name AS product_name,
+               p.play_amount AS product_played_amount,
+               TO_CHAR(t.created_at, 'HH24:00') || ' - ' || TO_CHAR(t.created_at + INTERVAL '1 hour', 'HH24:00') AS hour,
+               
+               SUM(CASE WHEN t.status = 'SUCCESS' THEN t.final_amount ELSE 0 END) AS tot_successful_trx_amount,
+               COUNT(CASE WHEN t.status = 'SUCCESS' THEN 1 END) AS tot_successful_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'SUCCESS' THEN t.phone_number END) AS tot_successful_trx_unique_count,
+               
+               SUM(CASE WHEN t.status = 'PENDING' THEN t.final_amount ELSE 0 END) AS tot_pending_trx_amount,
+               COUNT(CASE WHEN t.status = 'PENDING' THEN 1 END) AS tot_pending_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'PENDING' THEN t.phone_number END) AS tot_pending_trx_unique_count,
+               
+               SUM(CASE WHEN t.status = 'FAILED' THEN t.final_amount ELSE 0 END) AS tot_failed_trx_amount,
+               COUNT(CASE WHEN t.status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
+               COUNT(DISTINCT CASE WHEN t.status = 'FAILED' THEN t.phone_number END) AS tot_failed_trx_unique_count
+               
+        FROM transactions_new t
+        LEFT JOIN products p ON t.product_id = p.product_id
+        WHERE ($1::UUID IS NULL OR t.product_id = $1::UUID)
+        AND ($2::DATE IS NULL OR t.created_at::DATE = $2::DATE)
+        AND ($3::TIMESTAMP IS NULL OR t.created_at >= $3::TIMESTAMP)
+        AND ($4::TIMESTAMP IS NULL OR t.created_at <= $4::TIMESTAMP)
+        GROUP BY TO_CHAR(t.created_at, 'YYYY-MM-DD'),
+                 TO_CHAR(t.created_at, 'HH24:00'),
+                 p.product_name,
+                 p.play_amount
+        ORDER BY ` + orderClause
+
+	err := r.DB.Raw(query, productID, date, fromDate, toDate).Scan(&report).Error
 	return report, err
 }

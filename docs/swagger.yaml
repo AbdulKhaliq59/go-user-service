@@ -1,21 +1,5 @@
 basePath: /api/v1
 definitions:
-  models.CumulativeResponse:
-    properties:
-      revenue:
-        type: number
-      transactions:
-        type: integer
-    type: object
-  models.DailyTransactionStats:
-    properties:
-      total_amount:
-        type: number
-      total_failed_amount:
-        type: number
-      total_successful_amount:
-        type: number
-    type: object
   models.ExpectedTransactionRequest:
     properties:
       revenue:
@@ -25,111 +9,6 @@ definitions:
     required:
     - revenue
     - transactions
-    type: object
-  models.GeneralReportResponse:
-    properties:
-      cumulative:
-        properties:
-          actual:
-            $ref: '#/definitions/models.CumulativeResponse'
-          expected:
-            $ref: '#/definitions/models.CumulativeResponse'
-        type: object
-      current:
-        properties:
-          actual:
-            $ref: '#/definitions/models.CumulativeResponse'
-        type: object
-      previous:
-        properties:
-          total:
-            $ref: '#/definitions/models.CumulativeResponse'
-        type: object
-      telecoms:
-        items:
-          additionalProperties: true
-          type: object
-        type: array
-    type: object
-  models.MonthlyReportItem:
-    properties:
-      actual:
-        $ref: '#/definitions/models.ReportItemDetails'
-      expected:
-        $ref: '#/definitions/models.ReportItemDetails'
-      title:
-        description: Month name (e.g., "Jan")
-        type: string
-    type: object
-  models.RecentTransaction:
-    properties:
-      amount:
-        type: number
-      created_at:
-        type: string
-      phone_number:
-        type: string
-      status:
-        type: string
-    type: object
-  models.ReportItemDetails:
-    properties:
-      revenue:
-        type: number
-      transactions:
-        type: integer
-    type: object
-  models.TopTenTransactionResponse:
-    properties:
-      amount:
-        type: number
-      count:
-        type: integer
-      phone_number:
-        type: string
-    type: object
-  models.TransactionReportResponse:
-    properties:
-      total_transaction:
-        properties:
-          cumulative:
-            properties:
-              revenue:
-                type: number
-              transaction:
-                type: integer
-            type: object
-          current:
-            properties:
-              revenue:
-                type: number
-              transaction:
-                type: integer
-            type: object
-        type: object
-      unique:
-        properties:
-          cumulative:
-            properties:
-              uniqueHits:
-                type: integer
-            type: object
-          current:
-            properties:
-              uniqueHits:
-                type: integer
-            type: object
-        type: object
-    type: object
-  models.WeeklyReportItem:
-    properties:
-      actual:
-        $ref: '#/definitions/models.ReportItemDetails'
-      expected:
-        $ref: '#/definitions/models.ReportItemDetails'
-      title:
-        description: Week description (e.g., "Week Jan 1")
-        type: string
     type: object
 host: localhost:8080
 info:
@@ -145,6 +24,17 @@ info:
   title: LONDONWINNER
   version: "1.0"
 paths:
+  /report/daily-transaction-report:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed daily transaction report for the last 30 days
+      produces:
+      - application/json
+      responses: {}
+      summary: Get daily transaction report
+      tags:
+      - Report
   /report/daily-transactions:
     get:
       consumes:
@@ -153,10 +43,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.DailyTransactionStats'
         "500":
           description: Internal Server Error
           schema:
@@ -167,12 +53,7 @@ paths:
       - Bearer: []
       summary: Get daily transaction statistics
       tags:
-      - reports
-  /report/daily-transactions-report:
-    get:
-      responses: {}
-      tags:
-      - reports
+      - Report
   /report/draw:
     get:
       consumes:
@@ -184,7 +65,7 @@ paths:
       - Bearer: []
       summary: Get daily transaction report
       tags:
-      - reports
+      - Report
   /report/expected-transaction:
     post:
       consumes:
@@ -222,7 +103,7 @@ paths:
       - Bearer: []
       summary: Add an expected transaction
       tags:
-      - reports
+      - Report
   /report/general:
     get:
       consumes:
@@ -242,10 +123,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.GeneralReportResponse'
         "400":
           description: Bad Request
           schema:
@@ -268,12 +145,24 @@ paths:
       - Bearer: []
       summary: Generate general report
       tags:
-      - reports
+      - Report
   /report/hourly-transaction-report:
     get:
+      consumes:
+      - application/json
+      description: Get detailed hourly transaction report for a specific date
+      parameters:
+      - description: Date in YYYY-MM-DD format
+        in: query
+        name: date
+        required: true
+        type: string
+      produces:
+      - application/json
       responses: {}
+      summary: Get hourly transaction report
       tags:
-      - reports
+      - Report
   /report/monthly:
     get:
       consumes:
@@ -282,12 +171,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.MonthlyReportItem'
-            type: array
         "401":
           description: Unauthorized
           schema:
@@ -304,12 +187,87 @@ paths:
       - Bearer: []
       summary: Generate monthly report
       tags:
-      - reports
+      - Report
   /report/monthly-transaction-report:
     get:
+      consumes:
+      - application/json
+      description: Get detailed monthly transaction report for the last 12 months
+      produces:
+      - application/json
       responses: {}
+      summary: Get monthly transaction report
       tags:
-      - reports
+      - Report
+  /report/product-daily-transaction-report:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed daily transaction report filtered by product and date
+      parameters:
+      - description: Product ID (UUID)
+        in: query
+        name: productId
+        type: string
+      - description: Date (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get daily transaction report by product
+      tags:
+      - Report
+  /report/product-hourly-transaction-report:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed hourly transaction report filtered by product and
+        date range
+      parameters:
+      - description: Product ID (UUID)
+        in: query
+        name: productId
+        type: string
+      - description: Date (YYYY-MM-DD)
+        in: query
+        name: date
+        type: string
+      - description: From Date (YYYY-MM-DD HH:mm:ss)
+        in: query
+        name: fromDate
+        type: string
+      - description: To Date (YYYY-MM-DD HH:mm:ss)
+        in: query
+        name: toDate
+        type: string
+      - description: Order by clause (e.g., tot_successful_trx_amount DESC)
+        in: query
+        name: orderBy
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get hourly transaction report by product
+      tags:
+      - Report
+  /report/product-monthly-transaction-report:
+    get:
+      consumes:
+      - application/json
+      description: Get detailed monthly transaction report filtered by product
+      parameters:
+      - description: Product ID (UUID)
+        in: query
+        name: productId
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get monthly transaction report by product
+      tags:
+      - Report
   /report/top-ten:
     get:
       consumes:
@@ -318,12 +276,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.TopTenTransactionResponse'
-            type: array
         "500":
           description: Internal Server Error
           schema:
@@ -334,7 +286,7 @@ paths:
       - Bearer: []
       summary: Get top 10 transactions
       tags:
-      - reports
+      - Report
   /report/top-ten/recent:
     get:
       consumes:
@@ -343,12 +295,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.RecentTransaction'
-            type: array
         "500":
           description: Internal Server Error
           schema:
@@ -359,7 +305,7 @@ paths:
       - Bearer: []
       summary: Get top 10 recent successful transactions
       tags:
-      - reports
+      - Report
   /report/transaction:
     get:
       consumes:
@@ -388,10 +334,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/models.TransactionReportResponse'
         "400":
           description: Bad Request
           schema:
@@ -414,7 +356,7 @@ paths:
       - Bearer: []
       summary: Generate transaction report
       tags:
-      - reports
+      - Report
   /report/weekly:
     get:
       consumes:
@@ -423,12 +365,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.WeeklyReportItem'
-            type: array
         "401":
           description: Unauthorized
           schema:
@@ -445,7 +381,7 @@ paths:
       - Bearer: []
       summary: Generate weekly report
       tags:
-      - reports
+      - Report
 securityDefinitions:
   Bearer:
     description: Type "Bearer" followed by a space and JWT token

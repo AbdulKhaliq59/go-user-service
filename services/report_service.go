@@ -193,8 +193,19 @@ func (s *ReportService) GetMonthlyTransactionReport() ([]models.MonthlyTransacti
 	return s.ReportRepo.GetMonthlyTransactionReport()
 }
 
-func (s *ReportService) GetHourlyTransactionReport() ([]models.HourlyTransactionReport, error) {
-	return s.ReportRepo.GetHourlyTransactionReport()
+func (s *ReportService) GetHourlyTransactionReport(date string) ([]models.HourlyTransactionReport, error) {
+	return s.ReportRepo.GetHourlyTransactionReport(date)
+}
+func (s *ReportService) GetProductMonthlyReport(productID string) ([]models.ProductTransactionReport, error) {
+	return s.ReportRepo.GetProductMonthlyReport(productID)
+}
+
+func (s *ReportService) GetProductDailyReport(productID, date string) ([]models.ProductTransactionReport, error) {
+	return s.ReportRepo.GetProductDailyReport(productID, date)
+}
+
+func (s *ReportService) GetProductHourlyReport(productID, date, fromDate, toDate, orderBy string) ([]models.ProductTransactionReport, error) {
+	return s.ReportRepo.GetProductHourlyReport(productID, date, fromDate, toDate, orderBy)
 }
 
 func Paginate[T any](data []T, page, perPage int) models.PaginationResponse {

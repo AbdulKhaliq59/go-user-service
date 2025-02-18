@@ -21,13 +21,12 @@ func NewReportController(reportService *services.ReportService) *ReportControlle
 // GeneralReport godoc
 // @Summary Generate general report
 // @Description Generate a general report for the given date range
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Param fromDate query string true "From date (YYYY-MM-DD)"
 // @Param toDate query string true "To date (YYYY-MM-DD)"
 // @Security Bearer
-// @Success 200 {object} models.GeneralReportResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -62,7 +61,7 @@ func (c *ReportController) GeneralReport(ctx *gin.Context) {
 // TransactionReport godoc
 // @Summary Generate transaction report
 // @Description Generate a transaction report for the given date range, optionally filtered by product ID and status
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Param fromDate query string true "From date (YYYY-MM-DD)"
@@ -70,7 +69,6 @@ func (c *ReportController) GeneralReport(ctx *gin.Context) {
 // @Param productId query string false "Product ID"
 // @Param status query string false "Transaction status (PENDING, FAILED, SUCCESS)"
 // @Security Bearer
-// @Success 200 {object} models.TransactionReportResponse
 // @Failure 400 {object} map[string]string
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -107,11 +105,10 @@ func (c *ReportController) TransactionReport(ctx *gin.Context) {
 // MonthlyReport godoc
 // @Summary Generate monthly report
 // @Description Generate revenue and transaction statistics grouped by month
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {array} models.MonthlyReportItem
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /report/monthly [get]
@@ -129,11 +126,10 @@ func (c *ReportController) MonthlyReport(ctx *gin.Context) {
 // WeeklyReport godoc
 // @Summary Generate weekly report
 // @Description Generate revenue and transaction statistics grouped by week
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {array} models.WeeklyReportItem
 // @Failure 401 {object} map[string]string
 // @Failure 500 {object} map[string]string
 // @Router /report/weekly [get]
@@ -151,7 +147,7 @@ func (c *ReportController) WeeklyReport(ctx *gin.Context) {
 // AddExpectedTransaction godoc
 // @Summary Add an expected transaction
 // @Description Stores expected revenue and transaction count
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Param request body models.ExpectedTransactionRequest true "Expected Transaction Data"
@@ -186,11 +182,10 @@ func (c *ReportController) AddExpectedTransaction(ctx *gin.Context) {
 // GetTopTenTransactions godoc
 // @Summary Get top 10 transactions
 // @Description Retrieves the top 10 transactions based on total transaction amount
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {array} models.TopTenTransactionResponse
 // @Failure 500 {object} map[string]string
 // @Router /report/top-ten [get]
 func (c *ReportController) GetTopTenTransactions(ctx *gin.Context) {
@@ -206,11 +201,10 @@ func (c *ReportController) GetTopTenTransactions(ctx *gin.Context) {
 // GetTopTenRecentTransactions godoc
 // @Summary Get top 10 recent successful transactions
 // @Description Retrieves the top 10 most recent successful transactions
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {array} models.RecentTransaction
 // @Failure 500 {object} map[string]string
 // @Router /report/top-ten/recent [get]
 func (c *ReportController) GetTopTenRecentTransactions(ctx *gin.Context) {
@@ -226,11 +220,10 @@ func (c *ReportController) GetTopTenRecentTransactions(ctx *gin.Context) {
 // GetDailyTransactionStatistics godoc
 // @Summary Get daily transaction statistics
 // @Description Retrieves transaction statistics for the current day
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} models.DailyTransactionStats
 // @Failure 500 {object} map[string]string
 // @Router /report/daily-transactions [get]
 func (c *ReportController) GetDailyTransactionStatistics(ctx *gin.Context) {
@@ -243,20 +236,27 @@ func (c *ReportController) GetDailyTransactionStatistics(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, stats)
 }
 
-// Get Daily Transaction Report
-// @Tags reports
-// @Router /report/daily-transactions-report [get]
+// @Summary Get daily transaction report
+// @Description Get detailed daily transaction report for the last 30 days
+// @Tags Report
+// @Accept json
+// @Produce json
+// @Router /report/daily-transaction-report [get]
 func (c *ReportController) GetDailyTransactionReport(ctx *gin.Context) {
 	report, err := c.ReportService.GetDailyTransactionReport()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, report)
 }
 
-// Get Monthly Transaction Report
-// @Tags reports
+// @Summary Get monthly transaction report
+// @Description Get detailed monthly transaction report for the last 12 months
+// @Tags Report
+// @Accept json
+// @Produce json
 // @Router /report/monthly-transaction-report [get]
 func (c *ReportController) GetMonthlyTransactionReport(ctx *gin.Context) {
 	report, err := c.ReportService.GetMonthlyTransactionReport()
@@ -264,24 +264,36 @@ func (c *ReportController) GetMonthlyTransactionReport(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, report)
 }
 
-// Get Hourly Transaction Report
-// @Tags reports
+// @Summary Get hourly transaction report
+// @Description Get detailed hourly transaction report for a specific date
+// @Tags Report
+// @Accept json
+// @Produce json
+// @Param date query string true "Date in YYYY-MM-DD format"
 // @Router /report/hourly-transaction-report [get]
 func (c *ReportController) GetHourlyTransactionReport(ctx *gin.Context) {
-	report, err := c.ReportService.GetHourlyTransactionReport()
+	date := ctx.Query("date")
+	if date == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "date parameter is required"})
+		return
+	}
+
+	report, err := c.ReportService.GetHourlyTransactionReport(date)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, report)
 }
 
 // Get Daily Transaction Report godoc
 // @Summary Get daily transaction report
-// @Tags reports
+// @Tags Report
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -298,4 +310,71 @@ func (c *ReportController) GetDrawReport(ctx *gin.Context) {
 
 	paginatedResponse := services.Paginate(data, page, perPage)
 	ctx.JSON(http.StatusOK, paginatedResponse)
+}
+
+// @Summary Get monthly transaction report by product
+// @Description Get detailed monthly transaction report filtered by product
+// @Tags Report
+// @Accept json
+// @Produce json
+// @Param productId query string false "Product ID (UUID)"
+// @Router /report/product-monthly-transaction-report [get]
+func (c *ReportController) GetProductMonthlyTransactionReport(ctx *gin.Context) {
+	productID := ctx.Query("productId")
+
+	report, err := c.ReportService.GetProductMonthlyReport(productID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, report)
+}
+
+// @Summary Get daily transaction report by product
+// @Description Get detailed daily transaction report filtered by product and date
+// @Tags Report
+// @Accept json
+// @Produce json
+// @Param productId query string false "Product ID (UUID)"
+// @Param date query string false "Date (YYYY-MM-DD)"
+// @Router /report/product-daily-transaction-report [get]
+func (c *ReportController) GetProductDailyTransactionReport(ctx *gin.Context) {
+	productID := ctx.Query("productId")
+	date := ctx.Query("date")
+
+	report, err := c.ReportService.GetProductDailyReport(productID, date)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, report)
+}
+
+// @Summary Get hourly transaction report by product
+// @Description Get detailed hourly transaction report filtered by product and date range
+// @Tags Report
+// @Accept json
+// @Produce json
+// @Param productId query string false "Product ID (UUID)"
+// @Param date query string false "Date (YYYY-MM-DD)"
+// @Param fromDate query string false "From Date (YYYY-MM-DD HH:mm:ss)"
+// @Param toDate query string false "To Date (YYYY-MM-DD HH:mm:ss)"
+// @Param orderBy query string false "Order by clause (e.g., tot_successful_trx_amount DESC)"
+// @Router /report/product-hourly-transaction-report [get]
+func (c *ReportController) GetProductHourlyTransactionReport(ctx *gin.Context) {
+	productID := ctx.Query("productId")
+	date := ctx.Query("date")
+	fromDate := ctx.Query("fromDate")
+	toDate := ctx.Query("toDate")
+	orderBy := ctx.Query("orderBy")
+
+	report, err := c.ReportService.GetProductHourlyReport(productID, date, fromDate, toDate, orderBy)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, report)
 }
