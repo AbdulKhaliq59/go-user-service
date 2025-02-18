@@ -1,5 +1,56 @@
-basePath: /api/v1
 definitions:
+  models.CreateTransactionDto:
+    properties:
+      amount:
+        example: 0
+        minimum: 1
+        type: number
+      phone_number:
+        example: "250788205965"
+        type: string
+      productId:
+        example: string
+        type: string
+      reference_id:
+        example: string
+        type: string
+      telco:
+        allOf:
+        - $ref: '#/definitions/models.Telco'
+        example: string
+      token:
+        example: string
+        type: string
+      transaction_date:
+        example: "2025-02-18T08:45:19.803Z"
+        type: string
+    required:
+    - amount
+    - phone_number
+    - productId
+    - reference_id
+    - telco
+    - transaction_date
+    type: object
+  models.Draw:
+    properties:
+      createdAt:
+        type: string
+      drawId:
+        type: string
+      endDate:
+        type: string
+      isPlayed:
+        type: boolean
+      product:
+        $ref: '#/definitions/models.Product'
+      productId:
+        type: string
+      startDate:
+        type: string
+      updatedAt:
+        type: string
+    type: object
   models.ExpectedTransactionRequest:
     properties:
       revenue:
@@ -9,6 +60,178 @@ definitions:
     required:
     - revenue
     - transactions
+    type: object
+  models.PaymentDto:
+    properties:
+      agentCode:
+        description: Optional field
+        example: string
+        type: string
+      phoneNumber:
+        example: string
+        type: string
+      productId:
+        example: string
+        type: string
+    required:
+    - phoneNumber
+    - productId
+    type: object
+  models.PlayerStats:
+    properties:
+      numberOfPlayers:
+        type: integer
+      product:
+        $ref: '#/definitions/models.Product'
+    type: object
+  models.Product:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      drawPeriod:
+        type: string
+      expectedAmount:
+        type: number
+      id:
+        type: string
+      isAvailable:
+        type: boolean
+      isCallNeeded:
+        type: boolean
+      name:
+        type: string
+      numberOfWinners:
+        type: integer
+      picture:
+        type: string
+      playAmount:
+        type: number
+      productCost:
+        type: number
+      productIcrementer:
+        type: integer
+      productMargin:
+        type: number
+      updated_at:
+        type: string
+    type: object
+  models.ProductStats:
+    properties:
+      margin:
+        type: number
+      percentage:
+        type: number
+      product:
+        $ref: '#/definitions/models.Product'
+      totalamount:
+        type: number
+    type: object
+  models.Telco:
+    enum:
+    - MTN
+    - AIRTEL
+    type: string
+    x-enum-varnames:
+    - MTN
+    - AIRTEL
+  models.Token:
+    properties:
+      createdAt:
+        type: string
+      draw:
+        $ref: '#/definitions/models.Draw'
+      drawID:
+        type: string
+      productID:
+        type: string
+      referenceID:
+        type: string
+      tokenID:
+        type: integer
+      updatedAt:
+        type: string
+      userID:
+        type: string
+    type: object
+  models.Transaction:
+    properties:
+      amount:
+        type: number
+      channel_ref:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      discount_amount:
+        type: number
+      discount_code:
+        type: string
+      discount_type:
+        type: string
+      final_amount:
+        type: number
+      gw_ref:
+        type: string
+      id:
+        type: string
+      phone_number:
+        type: string
+      product:
+        $ref: '#/definitions/models.Product'
+      product_id:
+        type: string
+      reference_id:
+        type: string
+      referrer_id:
+        type: string
+      status:
+        $ref: '#/definitions/models.TransactionStatus'
+      status_message:
+        type: string
+      telco:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.TransactionStatus:
+    enum:
+    - PENDING
+    - FAILED
+    - SUCCESS
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusFailed
+    - StatusSuccess
+  models.TransactionTokenResponse:
+    properties:
+      token:
+        $ref: '#/definitions/models.Token'
+      transaction:
+        $ref: '#/definitions/models.Transaction'
+    type: object
+  utils.PaginationResponse:
+    properties:
+      currentPage:
+        type: integer
+      data: {}
+      lastPage:
+        type: integer
+      nextPage:
+        type: integer
+      pageSize:
+        type: integer
+      previousPage:
+        type: integer
+      status:
+        type: string
+      total:
+        type: integer
     type: object
 host: localhost:8080
 info:
@@ -24,7 +247,7 @@ info:
   title: LONDONWINNER
   version: "1.0"
 paths:
-  /report/daily-transaction-report:
+  /api/v1/report/daily-transaction-report:
     get:
       consumes:
       - application/json
@@ -35,26 +258,20 @@ paths:
       summary: Get daily transaction report
       tags:
       - Report
-  /report/daily-transactions:
+  /api/v1/report/daily-transactions:
     get:
       consumes:
       - application/json
       description: Retrieves transaction statistics for the current day
       produces:
       - application/json
-      responses:
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       security:
       - Bearer: []
       summary: Get daily transaction statistics
       tags:
       - Report
-  /report/draw:
+  /api/v1/report/draw:
     get:
       consumes:
       - application/json
@@ -66,7 +283,7 @@ paths:
       summary: Get daily transaction report
       tags:
       - Report
-  /report/expected-transaction:
+  /api/v1/report/expected-transaction:
     post:
       consumes:
       - application/json
@@ -80,31 +297,13 @@ paths:
           $ref: '#/definitions/models.ExpectedTransactionRequest'
       produces:
       - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       security:
       - Bearer: []
       summary: Add an expected transaction
       tags:
       - Report
-  /report/general:
+  /api/v1/report/general:
     get:
       consumes:
       - application/json
@@ -122,31 +321,13 @@ paths:
         type: string
       produces:
       - application/json
-      responses:
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       security:
       - Bearer: []
       summary: Generate general report
       tags:
       - Report
-  /report/hourly-transaction-report:
+  /api/v1/report/hourly-transaction-report:
     get:
       consumes:
       - application/json
@@ -163,32 +344,20 @@ paths:
       summary: Get hourly transaction report
       tags:
       - Report
-  /report/monthly:
+  /api/v1/report/monthly:
     get:
       consumes:
       - application/json
       description: Generate revenue and transaction statistics grouped by month
       produces:
       - application/json
-      responses:
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       security:
       - Bearer: []
       summary: Generate monthly report
       tags:
       - Report
-  /report/monthly-transaction-report:
+  /api/v1/report/monthly-transaction-report:
     get:
       consumes:
       - application/json
@@ -199,7 +368,7 @@ paths:
       summary: Get monthly transaction report
       tags:
       - Report
-  /report/product-daily-transaction-report:
+  /api/v1/report/product-daily-transaction-report:
     get:
       consumes:
       - application/json
@@ -219,7 +388,7 @@ paths:
       summary: Get daily transaction report by product
       tags:
       - Report
-  /report/product-hourly-transaction-report:
+  /api/v1/report/product-hourly-transaction-report:
     get:
       consumes:
       - application/json
@@ -252,7 +421,7 @@ paths:
       summary: Get hourly transaction report by product
       tags:
       - Report
-  /report/product-monthly-transaction-report:
+  /api/v1/report/product-monthly-transaction-report:
     get:
       consumes:
       - application/json
@@ -268,45 +437,33 @@ paths:
       summary: Get monthly transaction report by product
       tags:
       - Report
-  /report/top-ten:
+  /api/v1/report/top-ten:
     get:
       consumes:
       - application/json
       description: Retrieves the top 10 transactions based on total transaction amount
       produces:
       - application/json
-      responses:
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       security:
       - Bearer: []
       summary: Get top 10 transactions
       tags:
       - Report
-  /report/top-ten/recent:
+  /api/v1/report/top-ten/recent:
     get:
       consumes:
       - application/json
       description: Retrieves the top 10 most recent successful transactions
       produces:
       - application/json
-      responses:
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       security:
       - Bearer: []
       summary: Get top 10 recent successful transactions
       tags:
       - Report
-  /report/transaction:
+  /api/v1/report/transaction:
     get:
       consumes:
       - application/json
@@ -333,55 +490,375 @@ paths:
         type: string
       produces:
       - application/json
-      responses:
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       security:
       - Bearer: []
       summary: Generate transaction report
       tags:
       - Report
-  /report/weekly:
+  /api/v1/report/weekly:
     get:
       consumes:
       - application/json
       description: Generate revenue and transaction statistics grouped by week
       produces:
       - application/json
-      responses:
-        "401":
-          description: Unauthorized
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+      responses: {}
       security:
       - Bearer: []
       summary: Generate weekly report
       tags:
       - Report
+  /api/v1/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all transactions with optional pagination and filtering
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: pageNumber
+        type: integer
+      - description: 'Page size (default: 10)'
+        in: query
+        name: pageSize
+        type: integer
+      - description: Start date (RFC3339 format)
+        in: query
+        name: from
+        type: string
+      - description: End date (RFC3339 format)
+        in: query
+        name: to
+        type: string
+      - description: Transaction status
+        in: query
+        name: status
+        type: string
+      - description: Telecom provider
+        in: query
+        name: telecom
+        type: string
+      - description: Product ID
+        in: query
+        name: productId
+        type: string
+      - description: Agent code
+        in: query
+        name: agentCode
+        type: string
+      - description: Search by phone number
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationResponse'
+      summary: Get all transactions with pagination and filtering
+      tags:
+      - Transaction
+  /api/v1/transactions/{referenceId}/status:
+    get:
+      consumes:
+      - application/json
+      description: Returns the status and details of a transaction by its reference
+        ID
+      parameters:
+      - description: API Key
+        in: header
+        name: apiKey
+        required: true
+        type: string
+      - description: Reference ID of the transaction
+        in: path
+        name: referenceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Check the status of a transaction
+      tags:
+      - Transaction
+  /api/v1/transactions/activators/stats:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves user transaction stats grouped by day
+      parameters:
+      - description: User ID
+        in: query
+        name: userId
+        type: string
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get daily user transaction stats
+      tags:
+      - Transaction
+  /api/v1/transactions/all-tokens/{phoneNumber}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves ongoing, won, and expired tokens for a given phone number
+      parameters:
+      - description: Phone number
+        in: path
+        name: phoneNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get all tokens for a phone number
+      tags:
+      - Transaction
+  /api/v1/transactions/getTokenByPhoneNumber:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all transactions and their associated tokens for a given
+        phone number
+      parameters:
+      - description: Phone number of the customer
+        in: query
+        name: phoneNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.TransactionTokenResponse'
+            type: array
+        "400":
+          description: Bad Request - Phone number is missing
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      summary: Get transactions and tokens by phone number
+      tags:
+      - Transaction
+  /api/v1/transactions/initialize:
+    post:
+      consumes:
+      - application/json
+      description: Initializes payment transaction request
+      parameters:
+      - description: API Key
+        in: header
+        name: apiKey
+        required: true
+        type: string
+      - description: Transaction data
+        in: body
+        name: transaction
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateTransactionDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Initialize a transaction
+      tags:
+      - Transaction
+  /api/v1/transactions/my-token-stats/{phoneNumber}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves token statistics grouped by product for a given phone
+        number
+      parameters:
+      - description: Phone number of the user
+        in: query
+        name: phoneNumber
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get token statistics for a user
+      tags:
+      - Transaction
+  /api/v1/transactions/my-tokens/{phoneNumber}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves ongoing, won, and expired tokens for a given phone number
+      parameters:
+      - description: Phone number
+        in: path
+        name: phoneNumber
+        required: true
+        type: string
+      - description: Product ID
+        in: query
+        name: productId
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get all tokens for a phone number
+      tags:
+      - Transaction
+  /api/v1/transactions/payment/request:
+    post:
+      consumes:
+      - application/json
+      description: Processes a payment request and sends Kafka event
+      parameters:
+      - description: Payment data
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/models.PaymentDto'
+      produces:
+      - application/json
+      responses: {}
+      summary: Process a payment request
+      tags:
+      - Transaction
+  /api/v1/transactions/phone_number-hits:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves stats on transactions grouped by phone number
+      parameters:
+      - description: 'Page size (default: 10)'
+        in: query
+        name: pageSize
+        type: integer
+      - description: 'Page number (default: 1)'
+        in: query
+        name: pageNumber
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Get transaction stats by phone number
+      tags:
+      - Transaction
+  /api/v1/transactions/player-stats:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve player statistics with optional date range filtering
+      parameters:
+      - description: Date range (daily, weekly, monthly)
+        enum:
+        - daily
+        - weekly
+        - monthly
+        in: query
+        name: range
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PlayerStats'
+            type: array
+      summary: Get player statistics
+      tags:
+      - Transaction
+  /api/v1/transactions/product-stats:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve product statistics with optional date range filtering
+      parameters:
+      - description: Start date (RFC3339 format)
+        in: query
+        name: from
+        type: string
+      - description: End date (RFC3339 format)
+        in: query
+        name: to
+        type: string
+      - description: Date range (daily, weekly, monthly)
+        enum:
+        - daily
+        - weekly
+        - monthly
+        in: query
+        name: range
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ProductStats'
+            type: array
+      summary: Get product statistics
+      tags:
+      - Transaction
+  /api/v1/transactions/regenerate/token/{referenceId}:
+    post:
+      consumes:
+      - application/json
+      description: Sends a request to an external API to regenerate a token
+      parameters:
+      - description: Reference ID
+        in: path
+        name: referenceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Regenerate Token
+      tags:
+      - Transaction
+  /api/v1/transactions/resend-token/{token}:
+    post:
+      consumes:
+      - application/json
+      description: Resends a token via SMS for the given token ID
+      parameters:
+      - description: Token ID
+        in: path
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Resend Token SMS
+      tags:
+      - Transaction
 securityDefinitions:
   Bearer:
     description: Type "Bearer" followed by a space and JWT token

@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/report/daily-transaction-report": {
+        "/api/v1/report/daily-transaction-report": {
             "get": {
                 "description": "Get detailed daily transaction report for the last 30 days",
                 "consumes": [
@@ -40,7 +40,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/report/daily-transactions": {
+        "/api/v1/report/daily-transactions": {
             "get": {
                 "security": [
                     {
@@ -58,20 +58,10 @@ const docTemplate = `{
                     "Report"
                 ],
                 "summary": "Get daily transaction statistics",
-                "responses": {
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/report/draw": {
+        "/api/v1/report/draw": {
             "get": {
                 "security": [
                     {
@@ -91,7 +81,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/report/expected-transaction": {
+        "/api/v1/report/expected-transaction": {
             "post": {
                 "security": [
                     {
@@ -120,38 +110,10 @@ const docTemplate = `{
                         }
                     }
                 ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/report/general": {
+        "/api/v1/report/general": {
             "get": {
                 "security": [
                     {
@@ -185,38 +147,10 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/report/hourly-transaction-report": {
+        "/api/v1/report/hourly-transaction-report": {
             "get": {
                 "description": "Get detailed hourly transaction report for a specific date",
                 "consumes": [
@@ -241,7 +175,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/report/monthly": {
+        "/api/v1/report/monthly": {
             "get": {
                 "security": [
                     {
@@ -259,29 +193,10 @@ const docTemplate = `{
                     "Report"
                 ],
                 "summary": "Generate monthly report",
-                "responses": {
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/report/monthly-transaction-report": {
+        "/api/v1/report/monthly-transaction-report": {
             "get": {
                 "description": "Get detailed monthly transaction report for the last 12 months",
                 "consumes": [
@@ -297,7 +212,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/report/product-daily-transaction-report": {
+        "/api/v1/report/product-daily-transaction-report": {
             "get": {
                 "description": "Get detailed daily transaction report filtered by product and date",
                 "consumes": [
@@ -327,7 +242,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/report/product-hourly-transaction-report": {
+        "/api/v1/report/product-hourly-transaction-report": {
             "get": {
                 "description": "Get detailed hourly transaction report filtered by product and date range",
                 "consumes": [
@@ -375,7 +290,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/report/product-monthly-transaction-report": {
+        "/api/v1/report/product-monthly-transaction-report": {
             "get": {
                 "description": "Get detailed monthly transaction report filtered by product",
                 "consumes": [
@@ -399,7 +314,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/report/top-ten": {
+        "/api/v1/report/top-ten": {
             "get": {
                 "security": [
                     {
@@ -417,20 +332,10 @@ const docTemplate = `{
                     "Report"
                 ],
                 "summary": "Get top 10 transactions",
-                "responses": {
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/report/top-ten/recent": {
+        "/api/v1/report/top-ten/recent": {
             "get": {
                 "security": [
                     {
@@ -448,20 +353,10 @@ const docTemplate = `{
                     "Report"
                 ],
                 "summary": "Get top 10 recent successful transactions",
-                "responses": {
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/report/transaction": {
+        "/api/v1/report/transaction": {
             "get": {
                 "security": [
                     {
@@ -507,38 +402,10 @@ const docTemplate = `{
                         "in": "query"
                     }
                 ],
-                "responses": {
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
+                "responses": {}
             }
         },
-        "/report/weekly": {
+        "/api/v1/report/weekly": {
             "get": {
                 "security": [
                     {
@@ -556,13 +423,189 @@ const docTemplate = `{
                     "Report"
                 ],
                 "summary": "Generate weekly report",
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions": {
+            "get": {
+                "description": "Retrieve all transactions with optional pagination and filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get all transactions with pagination and filtering",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10)",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start date (RFC3339 format)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (RFC3339 format)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Transaction status",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Telecom provider",
+                        "name": "telecom",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Agent code",
+                        "name": "agentCode",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search by phone number",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
-                    "401": {
-                        "description": "Unauthorized",
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transactions/activators/stats": {
+            "get": {
+                "description": "Retrieves user transaction stats grouped by day",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get daily user transaction stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD)",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions/all-tokens/{phoneNumber}": {
+            "get": {
+                "description": "Retrieves ongoing, won, and expired tokens for a given phone number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get all tokens for a phone number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Phone number",
+                        "name": "phoneNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions/getTokenByPhoneNumber": {
+            "get": {
+                "description": "Retrieves all transactions and their associated tokens for a given phone number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get transactions and tokens by phone number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Phone number of the customer",
+                        "name": "phoneNumber",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.TransactionTokenResponse"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Phone number is missing",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -570,16 +613,416 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
                             }
                         }
                     }
                 }
             }
+        },
+        "/api/v1/transactions/initialize": {
+            "post": {
+                "description": "Initializes payment transaction request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Initialize a transaction",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "apiKey",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Transaction data",
+                        "name": "transaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateTransactionDto"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/api/v1/transactions/my-token-stats/{phoneNumber}": {
+            "get": {
+                "description": "Retrieves token statistics grouped by product for a given phone number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get token statistics for a user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Phone number of the user",
+                        "name": "phoneNumber",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions/my-tokens/{phoneNumber}": {
+            "get": {
+                "description": "Retrieves ongoing, won, and expired tokens for a given phone number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get all tokens for a phone number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Phone number",
+                        "name": "phoneNumber",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions/payment/request": {
+            "post": {
+                "description": "Processes a payment request and sends Kafka event",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Process a payment request",
+                "parameters": [
+                    {
+                        "description": "Payment data",
+                        "name": "payment",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PaymentDto"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions/phone_number-hits": {
+            "get": {
+                "description": "Retrieves stats on transactions grouped by phone number",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get transaction stats by phone number",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page size (default: 10)",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "pageNumber",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions/player-stats": {
+            "get": {
+                "description": "Retrieve player statistics with optional date range filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get player statistics",
+                "parameters": [
+                    {
+                        "enum": [
+                            "daily",
+                            "weekly",
+                            "monthly"
+                        ],
+                        "type": "string",
+                        "description": "Date range (daily, weekly, monthly)",
+                        "name": "range",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.PlayerStats"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transactions/product-stats": {
+            "get": {
+                "description": "Retrieve product statistics with optional date range filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Get product statistics",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (RFC3339 format)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (RFC3339 format)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "daily",
+                            "weekly",
+                            "monthly"
+                        ],
+                        "type": "string",
+                        "description": "Date range (daily, weekly, monthly)",
+                        "name": "range",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ProductStats"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/transactions/regenerate/token/{referenceId}": {
+            "post": {
+                "description": "Sends a request to an external API to regenerate a token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Regenerate Token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Reference ID",
+                        "name": "referenceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions/resend-token/{token}": {
+            "post": {
+                "description": "Resends a token via SMS for the given token ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Resend Token SMS",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token ID",
+                        "name": "token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/transactions/{referenceId}/status": {
+            "get": {
+                "description": "Returns the status and details of a transaction by its reference ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Check the status of a transaction",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Key",
+                        "name": "apiKey",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Reference ID of the transaction",
+                        "name": "referenceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
         }
     },
     "definitions": {
+        "models.CreateTransactionDto": {
+            "type": "object",
+            "required": [
+                "amount",
+                "phone_number",
+                "productId",
+                "reference_id",
+                "telco",
+                "transaction_date"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "minimum": 1,
+                    "example": 0
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "250788205965"
+                },
+                "productId": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "reference_id": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "telco": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Telco"
+                        }
+                    ],
+                    "example": "string"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "transaction_date": {
+                    "type": "string",
+                    "example": "2025-02-18T08:45:19.803Z"
+                }
+            }
+        },
+        "models.Draw": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "drawId": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "isPlayed": {
+                    "type": "boolean"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.Product"
+                },
+                "productId": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
         "models.ExpectedTransactionRequest": {
             "type": "object",
             "required": [
@@ -591,6 +1034,262 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "transactions": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.PaymentDto": {
+            "type": "object",
+            "required": [
+                "phoneNumber",
+                "productId"
+            ],
+            "properties": {
+                "agentCode": {
+                    "description": "Optional field",
+                    "type": "string",
+                    "example": "string"
+                },
+                "phoneNumber": {
+                    "type": "string",
+                    "example": "string"
+                },
+                "productId": {
+                    "type": "string",
+                    "example": "string"
+                }
+            }
+        },
+        "models.PlayerStats": {
+            "type": "object",
+            "properties": {
+                "numberOfPlayers": {
+                    "type": "integer"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.Product"
+                }
+            }
+        },
+        "models.Product": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "drawPeriod": {
+                    "type": "string"
+                },
+                "expectedAmount": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isAvailable": {
+                    "type": "boolean"
+                },
+                "isCallNeeded": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "numberOfWinners": {
+                    "type": "integer"
+                },
+                "picture": {
+                    "type": "string"
+                },
+                "playAmount": {
+                    "type": "number"
+                },
+                "productCost": {
+                    "type": "number"
+                },
+                "productIcrementer": {
+                    "type": "integer"
+                },
+                "productMargin": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ProductStats": {
+            "type": "object",
+            "properties": {
+                "margin": {
+                    "type": "number"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.Product"
+                },
+                "totalamount": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.Telco": {
+            "type": "string",
+            "enum": [
+                "MTN",
+                "AIRTEL"
+            ],
+            "x-enum-varnames": [
+                "MTN",
+                "AIRTEL"
+            ]
+        },
+        "models.Token": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "draw": {
+                    "$ref": "#/definitions/models.Draw"
+                },
+                "drawID": {
+                    "type": "string"
+                },
+                "productID": {
+                    "type": "string"
+                },
+                "referenceID": {
+                    "type": "string"
+                },
+                "tokenID": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Transaction": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "channel_ref": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "discount_amount": {
+                    "type": "number"
+                },
+                "discount_code": {
+                    "type": "string"
+                },
+                "discount_type": {
+                    "type": "string"
+                },
+                "final_amount": {
+                    "type": "number"
+                },
+                "gw_ref": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "product": {
+                    "$ref": "#/definitions/models.Product"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "reference_id": {
+                    "type": "string"
+                },
+                "referrer_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.TransactionStatus"
+                },
+                "status_message": {
+                    "type": "string"
+                },
+                "telco": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.TransactionStatus": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "FAILED",
+                "SUCCESS"
+            ],
+            "x-enum-varnames": [
+                "StatusPending",
+                "StatusFailed",
+                "StatusSuccess"
+            ]
+        },
+        "models.TransactionTokenResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "$ref": "#/definitions/models.Token"
+                },
+                "transaction": {
+                    "$ref": "#/definitions/models.Transaction"
+                }
+            }
+        },
+        "utils.PaginationResponse": {
+            "type": "object",
+            "properties": {
+                "currentPage": {
+                    "type": "integer"
+                },
+                "data": {},
+                "lastPage": {
+                    "type": "integer"
+                },
+                "nextPage": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "previousPage": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "total": {
                     "type": "integer"
                 }
             }
@@ -610,7 +1309,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "LONDONWINNER",
 	Description:      "A backend service written in Go with Gin framework",

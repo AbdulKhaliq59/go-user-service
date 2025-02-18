@@ -50,5 +50,8 @@ func ConnectDatabase() (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %v", err)
 	}
 
+	// ✅ List all tables in the database
+	listAllTables(db)
+
 	return db, nil
 }

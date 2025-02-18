@@ -4,36 +4,6 @@ import (
 	"time"
 )
 
-type TransactionStatus string
-
-const (
-	StatusPending TransactionStatus = "PENDING"
-	StatusFailed  TransactionStatus = "FAILED"
-	StatusSuccess TransactionStatus = "SUCCESS"
-)
-
-type Transaction struct {
-	ID             string            `gorm:"primaryKey;type:uuid" json:"id"`
-	ReferenceID    string            `gorm:"column:reference_id;not null;unique" json:"reference_id"`
-	PhoneNumber    string            `gorm:"column:phone_number;not null" json:"phone_number"`
-	Amount         float64           `gorm:"not null" json:"amount"`
-	DiscountCode   string            `json:"discount_code"`
-	DiscountType   string            `json:"discount_type"`
-	DiscountAmount float64           `json:"discount_amount"`
-	FinalAmount    float64           `gorm:"column:final_amount;not null" json:"final_amount"`
-	ReferrerID     string            `gorm:"column:referrer_id" json:"referrer_id"`
-	Description    string            `json:"description"`
-	ProductID      string            `gorm:"column:product_id" json:"product_id"`
-	UserID         string            `gorm:"column:user_id" json:"user_id"`
-	Status         TransactionStatus `gorm:"default:PENDING" json:"status"`
-	StatusMessage  string            `gorm:"column:status_message" json:"status_message"`
-	GwRef          string            `gorm:"column:gw_ref" json:"gw_ref"`
-	ChannelRef     string            `gorm:"column:channel_ref" json:"channel_ref"`
-	Telco          string            `json:"telco"`
-	CreatedAt      time.Time         `json:"created_at"`
-	UpdatedAt      time.Time         `json:"updated_at"`
-}
-
 type ExpectedTransaction struct {
 	ID           string    `json:"id" gorm:"primaryKey"`
 	Revenue      float64   `json:"revenue" binding:"required"`
@@ -78,10 +48,6 @@ type WeeklyReportItem struct {
 	Title    string            `json:"title"` // Week description (e.g., "Week Jan 1")
 	Actual   ReportItemDetails `json:"actual"`
 	Expected ReportItemDetails `json:"expected"`
-}
-
-func (Transaction) TableName() string {
-	return "transactions_new"
 }
 
 func (ExpectedTransaction) TableName() string {

@@ -26,7 +26,7 @@ import (
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
 // @host      localhost:8080
-// @BasePath  /api/v1
+// No BasePath annotation here
 
 // @securityDefinitions.apikey Bearer
 // @in header
@@ -55,6 +55,7 @@ func main() {
 	{
 
 		routes.SetupReportRoutes(v1, db)
+		routes.SetupTransactionRoutes(v1, db)
 	}
 
 	// Swagger documentation route
