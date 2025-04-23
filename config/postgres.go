@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type DatabaseConfig struct {
@@ -45,12 +46,19 @@ func ConnectDatabase() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
 		config.Host, config.User, config.Password, config.DBName, config.Port)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix:   "",    // table name prefix
+			SingularTable: false, // use plural table names (Products instead of Product)
+			NameReplacer:  nil,   // no name replacer
+			NoLowerCase:   true,  // keep original case (important for Product_Bonus)
+		},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %v", err)
 	}
 
-	// ✅ List all tables in the database
+	// Don't forget to import "gorm.io/gorm/schema" at the top of your file
 	listAllTables(db)
 
 	return db, nil

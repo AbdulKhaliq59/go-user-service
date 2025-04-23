@@ -24,6 +24,461 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/product": {
+            "get": {
+                "description": "Get a paginated list of products with optional filtering",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get all products",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "From date (YYYY-MM-DD)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "To date (YYYY-MM-DD)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Filter by availability",
+                        "name": "isAvailable",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new product with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Create a new product",
+                "parameters": [
+                    {
+                        "description": "Product object",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/assign-bonus/{productId}": {
+            "post": {
+                "description": "Assign bonus products to a specific product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Assign bonus products to a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Bonus Product IDs",
+                        "name": "bonusProducts",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BonusProductDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/bonus-products/{productId}": {
+            "get": {
+                "description": "Get all bonus products assigned to a specific product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get bonus products for a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/product/bonus/{bonusProductId}/assigned-products": {
+            "get": {
+                "description": "Get all products that have a specific bonus product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get products by bonus product ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bonus Product ID",
+                        "name": "bonusProductId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Product"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/file/delete/{filename}": {
+            "delete": {
+                "description": "Delete a file by its filename",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Delete a file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filename",
+                        "name": "filename",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/unassign-bonus/{productId}": {
+            "patch": {
+                "description": "Unassign bonus products from a specific product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Unassign bonus products from a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "productId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Bonus Product IDs",
+                        "name": "bonusProducts",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BonusProductDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/upload": {
+            "post": {
+                "description": "Upload a file and get its link",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Upload a file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductUploadResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/ussd": {
+            "get": {
+                "description": "Get a paginated list of available products for USSD",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get products for USSD",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "From date (YYYY-MM-DD)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "To date (YYYY-MM-DD)",
+                        "name": "to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Search term",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/product/{id}": {
+            "get": {
+                "description": "Get a product by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get a product by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Toggle the availability of a product (soft delete)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Delete a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update a product with the provided details",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Update a product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Product object",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/report/daily-transaction-report": {
             "get": {
                 "description": "Get detailed daily transaction report for the last 30 days",
@@ -948,6 +1403,101 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.BonusProductDTO": {
+            "type": "object",
+            "required": [
+                "bonusProductIds"
+            ],
+            "properties": {
+                "bonusProductIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "['string']"
+                    ]
+                }
+            }
+        },
+        "dto.CreateProductRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "drawPeriod",
+                "isAvailable",
+                "isBonus",
+                "isCallNeeded",
+                "numberOfWinners",
+                "playAmount",
+                "productCost",
+                "productName"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "drawPeriod": {
+                    "type": "integer"
+                },
+                "englishName": {
+                    "type": "string"
+                },
+                "isAvailable": {
+                    "type": "boolean"
+                },
+                "isBonus": {
+                    "type": "boolean"
+                },
+                "isCallNeeded": {
+                    "type": "boolean"
+                },
+                "numberOfWinners": {
+                    "type": "integer"
+                },
+                "playAmount": {
+                    "type": "integer"
+                },
+                "priority": {
+                    "type": "integer"
+                },
+                "productCost": {
+                    "type": "integer"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productPicture": {
+                    "type": "string"
+                },
+                "product_margin": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string",
+                    "example": "Product updated successfully"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "dto.ProductUploadResponse": {
+            "type": "object",
+            "properties": {
+                "fileLink": {
+                    "type": "string",
+                    "example": "http://example.com/uploads/image.jpg"
+                }
+            }
+        },
         "models.CreateTransactionDto": {
             "type": "object",
             "required": [
@@ -1010,7 +1560,12 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "product": {
-                    "$ref": "#/definitions/models.Product"
+                    "description": "Relations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    ]
                 },
                 "productId": {
                     "type": "string"
@@ -1018,8 +1573,32 @@ const docTemplate = `{
                 "startDate": {
                     "type": "string"
                 },
+                "temp_winners": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TempWinner"
+                    }
+                },
+                "token_millions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TokenMillion"
+                    }
+                },
+                "tokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Token"
+                    }
+                },
                 "updatedAt": {
                     "type": "string"
+                },
+                "won_tokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WonToken"
+                    }
                 }
             }
         },
@@ -1074,50 +1653,118 @@ const docTemplate = `{
         "models.Product": {
             "type": "object",
             "properties": {
-                "created_at": {
+                "avoidConflict": {
+                    "type": "boolean"
+                },
+                "bonusProducts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Product"
+                    }
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "createdAt": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
                 "drawPeriod": {
+                    "type": "integer"
+                },
+                "draws": {
+                    "description": "Relations",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Draw"
+                    }
+                },
+                "englishName": {
                     "type": "string"
                 },
-                "expectedAmount": {
-                    "type": "number"
-                },
-                "id": {
-                    "type": "string"
+                "expected_amount": {
+                    "description": "Using snake_case as in DB",
+                    "type": "integer"
                 },
                 "isAvailable": {
+                    "type": "boolean"
+                },
+                "isBonus": {
                     "type": "boolean"
                 },
                 "isCallNeeded": {
                     "type": "boolean"
                 },
-                "name": {
-                    "type": "string"
-                },
                 "numberOfWinners": {
                     "type": "integer"
                 },
-                "picture": {
-                    "type": "string"
-                },
                 "playAmount": {
-                    "type": "number"
+                    "description": "Changed from float64 to int4",
+                    "type": "integer"
+                },
+                "priority": {
+                    "type": "integer"
                 },
                 "productCost": {
-                    "type": "number"
+                    "description": "Changed from float64 to int4",
+                    "type": "integer"
                 },
                 "productIcrementer": {
                     "type": "integer"
                 },
-                "productMargin": {
-                    "type": "number"
-                },
-                "updated_at": {
+                "productId": {
                     "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productPicture": {
+                    "type": "string"
+                },
+                "product_margin": {
+                    "description": "Using snake_case as in DB",
+                    "type": "integer"
+                },
+                "requiredDrawDays": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tempWinners": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TempWinner"
+                    }
+                },
+                "tokenMillions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TokenMillion"
+                    }
+                },
+                "tokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Token"
+                    }
+                },
+                "transactions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Transaction"
+                    }
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "wonTokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WonToken"
+                    }
                 }
             }
         },
@@ -1141,40 +1788,131 @@ const docTemplate = `{
         "models.Telco": {
             "type": "string",
             "enum": [
-                "MTN",
+                "TNM",
                 "AIRTEL"
             ],
             "x-enum-varnames": [
-                "MTN",
-                "AIRTEL"
+                "TelcoTNM",
+                "TelcoAirtel"
             ]
         },
-        "models.Token": {
+        "models.TempWinner": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "draw": {
                     "$ref": "#/definitions/models.Draw"
                 },
-                "drawID": {
+                "draw_id": {
                     "type": "string"
                 },
-                "productID": {
+                "phone_number": {
                     "type": "string"
                 },
-                "referenceID": {
+                "product": {
+                    "description": "Relations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    ]
+                },
+                "product_id": {
                     "type": "string"
                 },
-                "tokenID": {
+                "reference_id": {
+                    "type": "string"
+                },
+                "token_id": {
                     "type": "integer"
                 },
-                "updatedAt": {
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Token": {
+            "type": "object",
+            "properties": {
+                "created_at": {
                     "type": "string"
                 },
-                "userID": {
+                "draw": {
+                    "$ref": "#/definitions/models.Draw"
+                },
+                "draw_id": {
                     "type": "string"
+                },
+                "product": {
+                    "description": "Relations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    ]
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "reference_id": {
+                    "type": "string"
+                },
+                "token_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "won_tokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WonToken"
+                    }
+                }
+            }
+        },
+        "models.TokenMillion": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "draw": {
+                    "$ref": "#/definitions/models.Draw"
+                },
+                "draw_id": {
+                    "type": "string"
+                },
+                "product": {
+                    "description": "Relations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    ]
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "reference_id": {
+                    "type": "string"
+                },
+                "token_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "won_tokens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.WonToken"
+                    }
                 }
             }
         },
@@ -1215,7 +1953,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "product": {
-                    "$ref": "#/definitions/models.Product"
+                    "description": "Relations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    ]
                 },
                 "product_id": {
                     "type": "string"
@@ -1233,7 +1976,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "telco": {
-                    "type": "string"
+                    "$ref": "#/definitions/models.Telco"
                 },
                 "updated_at": {
                     "type": "string"
@@ -1251,9 +1994,9 @@ const docTemplate = `{
                 "SUCCESS"
             ],
             "x-enum-varnames": [
-                "StatusPending",
-                "StatusFailed",
-                "StatusSuccess"
+                "TransactionStatusPending",
+                "TransactionStatusFailed",
+                "TransactionStatusSuccess"
             ]
         },
         "models.TransactionTokenResponse": {
@@ -1264,6 +2007,97 @@ const docTemplate = `{
                 },
                 "transaction": {
                     "$ref": "#/definitions/models.Transaction"
+                }
+            }
+        },
+        "models.WonToken": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer"
+                },
+                "confirmed_at": {
+                    "type": "string"
+                },
+                "confirmed_by": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "draw": {
+                    "$ref": "#/definitions/models.Draw"
+                },
+                "draw_id": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "handed_over": {
+                    "type": "boolean"
+                },
+                "handed_over_by": {
+                    "type": "string"
+                },
+                "handed_over_date": {
+                    "type": "string"
+                },
+                "heard_from": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "id_number": {
+                    "type": "string"
+                },
+                "is_confirmed": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "occupation": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "product": {
+                    "description": "Relations",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Product"
+                        }
+                    ]
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "reference_id": {
+                    "type": "string"
+                },
+                "signature": {
+                    "type": "string"
+                },
+                "token": {
+                    "$ref": "#/definitions/models.Token"
+                },
+                "token_id": {
+                    "type": "string"
+                },
+                "token_million": {
+                    "$ref": "#/definitions/models.TokenMillion"
+                },
+                "token_million_id": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

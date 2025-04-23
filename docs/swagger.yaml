@@ -1,4 +1,70 @@
 definitions:
+  dto.BonusProductDTO:
+    properties:
+      bonusProductIds:
+        example:
+        - '[''string'']'
+        items:
+          type: string
+        type: array
+    required:
+    - bonusProductIds
+    type: object
+  dto.CreateProductRequest:
+    properties:
+      description:
+        type: string
+      drawPeriod:
+        type: integer
+      englishName:
+        type: string
+      isAvailable:
+        type: boolean
+      isBonus:
+        type: boolean
+      isCallNeeded:
+        type: boolean
+      numberOfWinners:
+        type: integer
+      playAmount:
+        type: integer
+      priority:
+        type: integer
+      product_margin:
+        type: integer
+      productCost:
+        type: integer
+      productName:
+        type: string
+      productPicture:
+        type: string
+    required:
+    - description
+    - drawPeriod
+    - isAvailable
+    - isBonus
+    - isCallNeeded
+    - numberOfWinners
+    - playAmount
+    - productCost
+    - productName
+    type: object
+  dto.ProductResponse:
+    properties:
+      data: {}
+      message:
+        example: Product updated successfully
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+  dto.ProductUploadResponse:
+    properties:
+      fileLink:
+        example: http://example.com/uploads/image.jpg
+        type: string
+    type: object
   models.CreateTransactionDto:
     properties:
       amount:
@@ -43,13 +109,31 @@ definitions:
       isPlayed:
         type: boolean
       product:
-        $ref: '#/definitions/models.Product'
+        allOf:
+        - $ref: '#/definitions/models.Product'
+        description: Relations
       productId:
         type: string
       startDate:
         type: string
+      temp_winners:
+        items:
+          $ref: '#/definitions/models.TempWinner'
+        type: array
+      token_millions:
+        items:
+          $ref: '#/definitions/models.TokenMillion'
+        type: array
+      tokens:
+        items:
+          $ref: '#/definitions/models.Token'
+        type: array
       updatedAt:
         type: string
+      won_tokens:
+        items:
+          $ref: '#/definitions/models.WonToken'
+        type: array
     type: object
   models.ExpectedTransactionRequest:
     properties:
@@ -86,36 +170,83 @@ definitions:
     type: object
   models.Product:
     properties:
-      created_at:
+      avoidConflict:
+        type: boolean
+      bonusProducts:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
+      comment:
+        type: string
+      createdAt:
         type: string
       description:
         type: string
       drawPeriod:
+        type: integer
+      draws:
+        description: Relations
+        items:
+          $ref: '#/definitions/models.Draw'
+        type: array
+      englishName:
         type: string
-      expectedAmount:
-        type: number
-      id:
-        type: string
+      expected_amount:
+        description: Using snake_case as in DB
+        type: integer
       isAvailable:
+        type: boolean
+      isBonus:
         type: boolean
       isCallNeeded:
         type: boolean
-      name:
-        type: string
       numberOfWinners:
         type: integer
-      picture:
-        type: string
       playAmount:
-        type: number
+        description: Changed from float64 to int4
+        type: integer
+      priority:
+        type: integer
+      product_margin:
+        description: Using snake_case as in DB
+        type: integer
       productCost:
-        type: number
+        description: Changed from float64 to int4
+        type: integer
       productIcrementer:
         type: integer
-      productMargin:
-        type: number
-      updated_at:
+      productId:
         type: string
+      productName:
+        type: string
+      productPicture:
+        type: string
+      requiredDrawDays:
+        items:
+          type: integer
+        type: array
+      tempWinners:
+        items:
+          $ref: '#/definitions/models.TempWinner'
+        type: array
+      tokenMillions:
+        items:
+          $ref: '#/definitions/models.TokenMillion'
+        type: array
+      tokens:
+        items:
+          $ref: '#/definitions/models.Token'
+        type: array
+      transactions:
+        items:
+          $ref: '#/definitions/models.Transaction'
+        type: array
+      updatedAt:
+        type: string
+      wonTokens:
+        items:
+          $ref: '#/definitions/models.WonToken'
+        type: array
     type: object
   models.ProductStats:
     properties:
@@ -130,30 +261,86 @@ definitions:
     type: object
   models.Telco:
     enum:
-    - MTN
+    - TNM
     - AIRTEL
     type: string
     x-enum-varnames:
-    - MTN
-    - AIRTEL
-  models.Token:
+    - TelcoTNM
+    - TelcoAirtel
+  models.TempWinner:
     properties:
-      createdAt:
+      created_at:
         type: string
       draw:
         $ref: '#/definitions/models.Draw'
-      drawID:
+      draw_id:
         type: string
-      productID:
+      phone_number:
         type: string
-      referenceID:
+      product:
+        allOf:
+        - $ref: '#/definitions/models.Product'
+        description: Relations
+      product_id:
         type: string
-      tokenID:
+      reference_id:
+        type: string
+      token_id:
         type: integer
-      updatedAt:
+      updated_at:
         type: string
-      userID:
+    type: object
+  models.Token:
+    properties:
+      created_at:
         type: string
+      draw:
+        $ref: '#/definitions/models.Draw'
+      draw_id:
+        type: string
+      product:
+        allOf:
+        - $ref: '#/definitions/models.Product'
+        description: Relations
+      product_id:
+        type: string
+      reference_id:
+        type: string
+      token_id:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: string
+      won_tokens:
+        items:
+          $ref: '#/definitions/models.WonToken'
+        type: array
+    type: object
+  models.TokenMillion:
+    properties:
+      created_at:
+        type: string
+      draw:
+        $ref: '#/definitions/models.Draw'
+      draw_id:
+        type: string
+      product:
+        allOf:
+        - $ref: '#/definitions/models.Product'
+        description: Relations
+      product_id:
+        type: string
+      reference_id:
+        type: string
+      token_id:
+        type: integer
+      updated_at:
+        type: string
+      won_tokens:
+        items:
+          $ref: '#/definitions/models.WonToken'
+        type: array
     type: object
   models.Transaction:
     properties:
@@ -180,7 +367,9 @@ definitions:
       phone_number:
         type: string
       product:
-        $ref: '#/definitions/models.Product'
+        allOf:
+        - $ref: '#/definitions/models.Product'
+        description: Relations
       product_id:
         type: string
       reference_id:
@@ -192,7 +381,7 @@ definitions:
       status_message:
         type: string
       telco:
-        type: string
+        $ref: '#/definitions/models.Telco'
       updated_at:
         type: string
       user_id:
@@ -205,15 +394,74 @@ definitions:
     - SUCCESS
     type: string
     x-enum-varnames:
-    - StatusPending
-    - StatusFailed
-    - StatusSuccess
+    - TransactionStatusPending
+    - TransactionStatusFailed
+    - TransactionStatusSuccess
   models.TransactionTokenResponse:
     properties:
       token:
         $ref: '#/definitions/models.Token'
       transaction:
         $ref: '#/definitions/models.Transaction'
+    type: object
+  models.WonToken:
+    properties:
+      age:
+        type: integer
+      confirmed_at:
+        type: string
+      confirmed_by:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      draw:
+        $ref: '#/definitions/models.Draw'
+      draw_id:
+        type: string
+      gender:
+        type: string
+      handed_over:
+        type: boolean
+      handed_over_by:
+        type: string
+      handed_over_date:
+        type: string
+      heard_from:
+        type: string
+      id:
+        type: string
+      id_number:
+        type: string
+      is_confirmed:
+        type: boolean
+      name:
+        type: string
+      occupation:
+        type: string
+      phone_number:
+        type: string
+      product:
+        allOf:
+        - $ref: '#/definitions/models.Product'
+        description: Relations
+      product_id:
+        type: string
+      reference_id:
+        type: string
+      signature:
+        type: string
+      token:
+        $ref: '#/definitions/models.Token'
+      token_id:
+        type: string
+      token_million:
+        $ref: '#/definitions/models.TokenMillion'
+      token_million_id:
+        type: integer
+      updated_at:
+        type: string
     type: object
   utils.PaginationResponse:
     properties:
@@ -247,6 +495,306 @@ info:
   title: LONDONWINNER
   version: "1.0"
 paths:
+  /api/v1/product:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of products with optional filtering
+      parameters:
+      - description: Page number
+        in: query
+        name: pageNumber
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      - description: From date (YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: To date (YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      - description: Filter by availability
+        in: query
+        name: isAvailable
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationResponse'
+      summary: Get all products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      description: Create a new product with the provided details
+      parameters:
+      - description: Product object
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+      summary: Create a new product
+      tags:
+      - products
+  /api/v1/product/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Toggle the availability of a product (soft delete)
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+      summary: Delete a product
+      tags:
+      - products
+    get:
+      consumes:
+      - application/json
+      description: Get a product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+      summary: Get a product by ID
+      tags:
+      - products
+    patch:
+      consumes:
+      - application/json
+      description: Update a product with the provided details
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product object
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/models.Product'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+      summary: Update a product
+      tags:
+      - products
+  /api/v1/product/assign-bonus/{productId}:
+    post:
+      consumes:
+      - application/json
+      description: Assign bonus products to a specific product
+      parameters:
+      - description: Product ID
+        in: path
+        name: productId
+        required: true
+        type: string
+      - description: Bonus Product IDs
+        in: body
+        name: bonusProducts
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BonusProductDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+      summary: Assign bonus products to a product
+      tags:
+      - products
+  /api/v1/product/bonus-products/{productId}:
+    get:
+      consumes:
+      - application/json
+      description: Get all bonus products assigned to a specific product
+      parameters:
+      - description: Product ID
+        in: path
+        name: productId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get bonus products for a product
+      tags:
+      - products
+  /api/v1/product/bonus/{bonusProductId}/assigned-products:
+    get:
+      consumes:
+      - application/json
+      description: Get all products that have a specific bonus product
+      parameters:
+      - description: Bonus Product ID
+        in: path
+        name: bonusProductId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Product'
+            type: array
+      summary: Get products by bonus product ID
+      tags:
+      - products
+  /api/v1/product/file/delete/{filename}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a file by its filename
+      parameters:
+      - description: Filename
+        in: path
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+      summary: Delete a file
+      tags:
+      - products
+  /api/v1/product/unassign-bonus/{productId}:
+    patch:
+      consumes:
+      - application/json
+      description: Unassign bonus products from a specific product
+      parameters:
+      - description: Product ID
+        in: path
+        name: productId
+        required: true
+        type: string
+      - description: Bonus Product IDs
+        in: body
+        name: bonusProducts
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BonusProductDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Product'
+      summary: Unassign bonus products from a product
+      tags:
+      - products
+  /api/v1/product/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a file and get its link
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductUploadResponse'
+      summary: Upload a file
+      tags:
+      - products
+  /api/v1/product/ussd:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of available products for USSD
+      parameters:
+      - description: Page number
+        in: query
+        name: pageNumber
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      - description: From date (YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: To date (YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      - description: Search term
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationResponse'
+      summary: Get products for USSD
+      tags:
+      - products
   /api/v1/report/daily-transaction-report:
     get:
       consumes:

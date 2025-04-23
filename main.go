@@ -56,6 +56,7 @@ func main() {
 
 		routes.SetupReportRoutes(v1, db)
 		routes.SetupTransactionRoutes(v1, db)
+		routes.SetupProductRoutes(v1, db)
 	}
 
 	// Swagger documentation route

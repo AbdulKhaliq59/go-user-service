@@ -8,55 +8,54 @@ import (
 	"gorm.io/gorm"
 )
 
+type TransactionStatus string
 type Telco string
 
 const (
-	MTN    Telco = "MTN"
-	AIRTEL Telco = "AIRTEL"
-)
+	TransactionStatusPending TransactionStatus = "PENDING"
+	TransactionStatusFailed  TransactionStatus = "FAILED"
+	TransactionStatusSuccess TransactionStatus = "SUCCESS"
 
-type TransactionStatus string
-
-const (
-	StatusPending TransactionStatus = "PENDING"
-	StatusFailed  TransactionStatus = "FAILED"
-	StatusSuccess TransactionStatus = "SUCCESS"
+	TelcoTNM    Telco = "TNM"
+	TelcoAirtel Telco = "AIRTEL"
 )
 
 type Transaction struct {
-	ID             string            `gorm:"primaryKey;type:uuid" json:"id"`
-	ReferenceID    string            `gorm:"column:reference_id;not null;unique" json:"reference_id"`
+	ID             uuid.UUID         `gorm:"type:uuid;primary_key;column:id" json:"id"`
+	ReferenceID    string            `gorm:"column:reference_id;unique;not null" json:"reference_id"`
 	PhoneNumber    string            `gorm:"column:phone_number;not null" json:"phone_number"`
-	Amount         float64           `gorm:"not null" json:"amount"`
-	DiscountCode   string            `json:"discount_code"`
-	DiscountType   string            `json:"discount_type"`
-	DiscountAmount float64           `json:"discount_amount"`
+	Amount         float64           `gorm:"column:amount;not null" json:"amount"`
+	DiscountCode   *string           `gorm:"column:discount_code" json:"discount_code"`
+	DiscountType   *string           `gorm:"column:discount_type" json:"discount_type"`
+	DiscountAmount *float64          `gorm:"column:discount_amount" json:"discount_amount"`
 	FinalAmount    float64           `gorm:"column:final_amount;not null" json:"final_amount"`
-	ReferrerID     string            `gorm:"column:referrer_id" json:"referrer_id"`
-	Description    string            `json:"description"`
-	ProductID      string            `gorm:"column:product_id" json:"product_id"`
-	Product        *Product          `gorm:"foreignKey:ProductID" json:"product,omitempty"`
-	UserID         string            `gorm:"column:user_id" json:"user_id"`
-	Status         TransactionStatus `gorm:"default:PENDING" json:"status"`
-	StatusMessage  string            `gorm:"column:status_message" json:"status_message"`
-	GwRef          string            `gorm:"column:gw_ref" json:"gw_ref"`
-	ChannelRef     string            `gorm:"column:channel_ref" json:"channel_ref"`
-	Telco          string            `json:"telco"`
-	CreatedAt      time.Time         `json:"created_at"`
-	UpdatedAt      time.Time         `json:"updated_at"`
+	ReferrerID     *string           `gorm:"column:referrer_id" json:"referrer_id"`
+	Description    *string           `gorm:"column:description" json:"description"`
+	ProductID      uuid.UUID         `gorm:"type:uuid;column:product_id" json:"product_id"`
+	UserID         *string           `gorm:"column:user_id" json:"user_id"`
+	Status         TransactionStatus `gorm:"column:status;default:PENDING" json:"status"`
+	StatusMessage  *string           `gorm:"column:status_message" json:"status_message"`
+	GwRef          *string           `gorm:"column:gw_ref" json:"gw_ref"`
+	ChannelRef     *string           `gorm:"column:channel_ref" json:"channel_ref"`
+	Telco          *Telco            `gorm:"column:telco" json:"telco"`
+	CreatedAt      time.Time         `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt      time.Time         `gorm:"column:updated_at" json:"updated_at"`
+
+	// Relations
+	Product *Product `gorm:"foreignKey:ProductID" json:"product,omitempty"`
 }
 
-func (t *Transaction) BeforeCreate(tx *gorm.DB) (err error) {
-	if t.ID == "" {
-		t.ID = uuid.New().String()
-	}
-	if t.Status == "" {
-		t.Status = StatusPending
-	}
-	return nil
-}
+// TableName specifies the table name for the Transaction model
 func (Transaction) TableName() string {
-	return "transactions_new"
+	return "transactions"
+}
+
+// BeforeCreate will set a UUID if it hasn't been set
+func (t *Transaction) BeforeCreate(tx *gorm.DB) (err error) {
+	if t.ID == uuid.Nil {
+		t.ID = uuid.New()
+	}
+	return
 }
 
 type CreateTransactionDto struct {

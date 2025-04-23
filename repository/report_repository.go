@@ -137,11 +137,11 @@ func (r *ReportRepository) TransactionReport(fromDate, toDate time.Time, product
 	response := models.TransactionReportResponse{}
 
 	// Build the base query for revenue and transaction count
-	baseQuery := "SELECT SUM(final_amount) as revenue, COUNT(id) as transactions FROM transactions_new WHERE 1=1"
+	baseQuery := "SELECT SUM(final_amount) as revenue, COUNT(id) as transactions FROM transactions WHERE 1=1"
 	baseQueryParams := []interface{}{}
 
 	// Build the unique hits query
-	uniqueQuery := "SELECT COUNT(DISTINCT phone_number) as unique_hits FROM transactions_new WHERE 1=1"
+	uniqueQuery := "SELECT COUNT(DISTINCT phone_number) as unique_hits FROM transactions WHERE 1=1"
 	uniqueQueryParams := []interface{}{}
 
 	// Add product filter if provided
@@ -268,7 +268,7 @@ func (r *ReportRepository) GetMonthlyReport() ([]MonthlyReportResult, error) {
 			COALESCE(SUM(final_amount), 0) AS revenue,
 			COUNT(*) AS transactions
 		FROM
-			transactions_new
+			transactions
 		WHERE
 			status = 'SUCCESS'
 		GROUP BY
@@ -307,7 +307,7 @@ func (r *ReportRepository) GetWeeklyReport() ([]WeeklyReportResult, error) {
 			COALESCE(SUM(final_amount), 0) AS revenue,
 			COUNT(*) AS transactions
 		FROM
-			transactions_new
+			transactions
 		WHERE
 			status = 'SUCCESS'
 		GROUP BY
@@ -335,7 +335,7 @@ func (r *ReportRepository) AddExpectedTransaction(expected models.ExpectedTransa
 
 func (r *ReportRepository) GetTopTenTransactions() ([]models.TopTenTransactionResponse, error) {
 	var topTransactions []models.TopTenTransactionResponse
-	err := r.DB.Table("transactions_new").
+	err := r.DB.Table("transactions").
 		Select("phone_number, SUM(final_amount) as amount, COUNT(phone_number) as count").
 		Group("phone_number").
 		Order("amount DESC").
@@ -349,7 +349,7 @@ func (r *ReportRepository) GetTopTenTransactions() ([]models.TopTenTransactionRe
 func (r *ReportRepository) GetTopTenRecentTransactions() ([]models.RecentTransaction, error) {
 	var recentTransactions []models.RecentTransaction
 
-	err := r.DB.Table("transactions_new").
+	err := r.DB.Table("transactions").
 		Select("phone_number, COALESCE(final_amount, 0) as amount, COALESCE(status, '') as status, created_at").
 		Where("status = ?", "SUCCESS").
 		Order("created_at DESC").
@@ -371,7 +371,7 @@ func (r *ReportRepository) GetDailyTransactionStatistics() (models.DailyTransact
 	endDate := startDate.Add(24 * time.Hour)
 
 	// Query total transactions (handle NULL with COALESCE)
-	err := r.DB.Table("transactions_new").
+	err := r.DB.Table("transactions").
 		Select("COALESCE(SUM(final_amount), 0) as total_amount").
 		Where("created_at >= ? AND created_at < ?", startDate, endDate).
 		Scan(&stats.TotalAmount).Error
@@ -381,7 +381,7 @@ func (r *ReportRepository) GetDailyTransactionStatistics() (models.DailyTransact
 	}
 
 	// Query successful transactions (handle NULL with COALESCE)
-	err = r.DB.Table("transactions_new").
+	err = r.DB.Table("transactions").
 		Select("COALESCE(SUM(final_amount), 0) as total_successful_amount").
 		Where("created_at >= ? AND created_at < ? AND status = ?", startDate, endDate, "SUCCESS").
 		Scan(&stats.TotalSuccessfulAmount).Error
@@ -391,7 +391,7 @@ func (r *ReportRepository) GetDailyTransactionStatistics() (models.DailyTransact
 	}
 
 	// Query failed transactions (handle NULL with COALESCE)
-	err = r.DB.Table("transactions_new").
+	err = r.DB.Table("transactions").
 		Select("COALESCE(SUM(final_amount), 0) as total_failed_amount").
 		Where("created_at >= ? AND created_at < ? AND status != ?", startDate, endDate, "SUCCESS").
 		Scan(&stats.TotalFailedAmount).Error
@@ -416,7 +416,7 @@ func (r *ReportRepository) GetDailyTransactionReport() ([]models.DailyTransactio
                COUNT(CASE WHEN status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
                COUNT(DISTINCT CASE WHEN status = 'FAILED' THEN phone_number END) AS tot_failed_trx_unique_count
                
-        FROM transactions_new
+        FROM transactions
         WHERE created_at > CURRENT_DATE - INTERVAL '30 days'  -- You can adjust the date range as needed
         GROUP BY DATE(created_at)
         ORDER BY DATE(created_at) DESC;
@@ -446,7 +446,7 @@ func (r *ReportRepository) GetMonthlyTransactionReport() ([]models.MonthlyTransa
                COUNT(CASE WHEN status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
                COUNT(DISTINCT CASE WHEN status = 'FAILED' THEN phone_number END) AS tot_failed_trx_unique_count
                
-        FROM transactions_new
+        FROM transactions
         WHERE created_at > CURRENT_DATE - INTERVAL '12 months'  -- You can adjust the date range as needed
         GROUP BY EXTRACT(YEAR FROM created_at), 
                  EXTRACT(MONTH FROM created_at),
@@ -480,7 +480,7 @@ func (r *ReportRepository) GetHourlyTransactionReport(date string) ([]models.Hou
                COUNT(CASE WHEN status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
                COUNT(DISTINCT CASE WHEN status = 'FAILED' THEN phone_number END) AS tot_failed_trx_unique_count
                
-        FROM transactions_new
+        FROM transactions
         WHERE DATE(created_at) = $1
         GROUP BY DATE(created_at), EXTRACT(HOUR FROM created_at)
         ORDER BY DATE(created_at), EXTRACT(HOUR FROM created_at) DESC;
@@ -511,7 +511,7 @@ func (r *ReportRepository) GetProductMonthlyReport(productID string) ([]models.P
                COUNT(CASE WHEN t.status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
                COUNT(DISTINCT CASE WHEN t.status = 'FAILED' THEN t.phone_number END) AS tot_failed_trx_unique_count
                
-        FROM transactions_new t
+        FROM transactions t
         LEFT JOIN products p ON t.product_id = p.product_id
         WHERE ($1::UUID IS NULL OR t.product_id = $1::UUID)
         GROUP BY EXTRACT(YEAR FROM t.created_at),
@@ -547,7 +547,7 @@ func (r *ReportRepository) GetProductDailyReport(productID, date string) ([]mode
                COUNT(CASE WHEN t.status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
                COUNT(DISTINCT CASE WHEN t.status = 'FAILED' THEN t.phone_number END) AS tot_failed_trx_unique_count
                
-        FROM transactions_new t
+        FROM transactions t
         LEFT JOIN products p ON t.product_id = p.product_id
         WHERE ($1::UUID IS NULL OR t.product_id = $1::UUID)
         AND ($2::DATE IS NULL OR t.created_at::DATE = $2::DATE)
@@ -588,7 +588,7 @@ func (r *ReportRepository) GetProductHourlyReport(productID, date, fromDate, toD
                COUNT(CASE WHEN t.status = 'FAILED' THEN 1 END) AS tot_failed_trx_count,
                COUNT(DISTINCT CASE WHEN t.status = 'FAILED' THEN t.phone_number END) AS tot_failed_trx_unique_count
                
-        FROM transactions_new t
+        FROM transactions t
         LEFT JOIN products p ON t.product_id = p.product_id
         WHERE ($1::UUID IS NULL OR t.product_id = $1::UUID)
         AND ($2::DATE IS NULL OR t.created_at::DATE = $2::DATE)

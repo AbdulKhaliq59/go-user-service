@@ -14,6 +14,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/Nerzal/gocloak/v13"
 	"gorm.io/gorm"
 )
@@ -60,9 +62,8 @@ func (s *TransactionService) Initialize(dto models.CreateTransactionDto, apiKey 
 		PhoneNumber: dto.PhoneNumber,
 		Amount:      dto.Amount,
 		FinalAmount: dto.Amount, // For now, just use the same amount
-		Telco:       string(dto.Telco),
-		Status:      models.StatusPending,
-		ProductID:   dto.ProductID,
+		Telco:       (*models.Telco)(&dto.Telco),
+		ProductID:   uuid.MustParse(dto.ProductID),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
@@ -120,10 +121,10 @@ func (s *TransactionService) FindAll(query utils.PaginationQuery) (*utils.Pagina
 }
 func (s *TransactionService) GetProductStats(from *time.Time, to *time.Time, rangeType string) ([]models.ProductStats, error) {
 	// Build base query with quoted table names and correct column names
-	query := s.db.Table("\"transactions_new\"").
-		Select("\"Products\".*, SUM(\"transactions_new\".final_amount) as totalamount").
-		Joins("INNER JOIN \"Products\" ON \"transactions_new\".product_id = \"Products\".\"productId\"").
-		Where("\"transactions_new\".status = ?", models.StatusSuccess).
+	query := s.db.Table("\"transactions\"").
+		Select("\"Products\".*, SUM(\"transactions\".final_amount) as totalamount").
+		Joins("INNER JOIN \"Products\" ON \"transactions\".product_id = \"Products\".\"productId\"").
+		Where("\"transactions\".status = ?", models.TransactionStatusSuccess).
 		Group("\"Products\".\"productId\"")
 
 	// Apply date filters based on range or explicit from/to
@@ -145,9 +146,9 @@ func (s *TransactionService) GetProductStats(from *time.Time, to *time.Time, ran
 			end = time.Date(now.Year(), now.Month()+1, 0, 23, 59, 59, 999999999, now.Location())
 		}
 
-		query = query.Where("\"transactions_new\".created_at BETWEEN ? AND ?", start, end)
+		query = query.Where("\"transactions\".created_at BETWEEN ? AND ?", start, end)
 	} else if from != nil && to != nil {
-		query = query.Where("\"transactions_new\".created_at BETWEEN ? AND ?", from, to)
+		query = query.Where("\"transactions\".created_at BETWEEN ? AND ?", from, to)
 	}
 
 	// Execute the query
@@ -171,20 +172,26 @@ func (s *TransactionService) GetProductStats(from *time.Time, to *time.Time, ran
 
 		// Map product data - with safer type conversions
 		product := models.Product{
-			ProductID: result["productId"].(string),
+			ProductID: func() uuid.UUID {
+				if id, ok := result["productId"].(string); ok {
+					parsedID, _ := uuid.Parse(id)
+					return parsedID
+				}
+				return uuid.Nil
+			}(),
 			// Handle integer types safely
 			ProductIncrementer: safeIntFromInterface(result["productIcrementer"]),
-			ProductName:        safeCastString(result["productName"]),
-			ProductPicture:     safeCastString(result["productPicture"]),
-			Description:        safeCastString(result["description"]),
-			IsAvailable:        safeCastBool(result["isAvailable"]),
-			IsCallNeeded:       safeCastBool(result["isCallNeeded"]),
-			ProductCost:        safeCastFloat64(result["productCost"]),
-			DrawPeriod:         safeCastString(result["drawPeriod"]),
-			ProductMargin:      safeCastFloat64(result["product_margin"]),
-			ExpectedAmount:     safeCastFloat64(result["expected_amount"]),
-			NumberOfWinners:    safeIntFromInterface(result["numberOfWinners"]),
-			PlayAmount:         safeCastFloat64(result["playAmount"]),
+			ProductName:        StringPtr(safeCastString(result["productName"])),
+			ProductPicture:     StringPtr(safeCastString(result["productPicture"])),
+			Description:        StringPtr(safeCastString(result["description"])),
+			IsAvailable:        BoolPtr(safeCastBool(result["isAvailable"])),
+			IsCallNeeded:       BoolPtr(safeCastBool(result["isCallNeeded"])),
+			ProductCost:        IntPtr(safeIntFromInterface(result["productCost"])),
+			DrawPeriod:         IntPtr(safeIntFromInterface(result["drawPeriod"])),
+			ProductMargin:      IntPtr(safeIntFromInterface(result["product_margin"])),
+			ExpectedAmount:     IntPtr(safeIntFromInterface(result["expected_amount"])),
+			NumberOfWinners:    IntPtr(safeIntFromInterface(result["numberOfWinners"])),
+			PlayAmount:         IntPtr(safeIntFromInterface(result["playAmount"])),
 			CreatedAt:          result["createdAt"].(time.Time),
 			UpdatedAt:          result["updatedAt"].(time.Time),
 		}
@@ -208,8 +215,8 @@ func (s *TransactionService) GetProductStats(from *time.Time, to *time.Time, ran
 		}
 		tokenQuery.Count(&tokenCount)
 
-		if product.ExpectedAmount > 0 && tokenCount > 0 {
-			productStat.Margin = ((float64(tokenCount) * product.PlayAmount) / product.ExpectedAmount) * 100
+		if product.ExpectedAmount != nil && *product.ExpectedAmount > 0 && tokenCount > 0 {
+			productStat.Margin = ((float64(tokenCount) * float64(*product.PlayAmount)) / float64(*product.ExpectedAmount)) * 100
 			// Round to 4 decimal places
 			productStat.Margin = float64(int(productStat.Margin*10000)) / 10000
 		}
@@ -238,6 +245,18 @@ func (s *TransactionService) GetProductStats(from *time.Time, to *time.Time, ran
 }
 
 // Helper functions for safe type conversion
+
+func IntPtr(i int) *int {
+	return &i
+}
+
+func Float64Ptr(f float64) *float64 {
+	return &f
+}
+func BoolPtr(b bool) *bool {
+	return &b
+}
+
 func safeIntFromInterface(value interface{}) int {
 	switch v := value.(type) {
 	case int:
@@ -295,10 +314,10 @@ func safeCastFloat64(value interface{}) float64 {
 // Updated method for getting player stats with correct type conversion
 func (s *TransactionService) GetPlayerStats(rangeType string) ([]models.PlayerStats, error) {
 	// Build base query with quoted table names and correct column names
-	query := s.db.Table("\"transactions_new\"").
+	query := s.db.Table("\"transactions\"").
 		Select("\"Products\".*, COUNT(DISTINCT \"transactions_new\".phone_number) as numberOfPlayers").
 		Joins("INNER JOIN \"Products\" ON \"transactions_new\".product_id = \"Products\".\"productId\"").
-		Where("\"transactions_new\".status = ?", models.StatusSuccess).
+		Where("\"transactions_new\".status = ?", models.TransactionStatusSuccess).
 		Group("\"Products\".\"productId\"")
 
 	// Apply date filters based on range
@@ -336,20 +355,26 @@ func (s *TransactionService) GetPlayerStats(rangeType string) ([]models.PlayerSt
 
 		// Map product data - with safer type conversions
 		product := models.Product{
-			ProductID: result["productId"].(string),
+			ProductID: func() uuid.UUID {
+				if id, ok := result["productId"].(string); ok {
+					parsedID, _ := uuid.Parse(id)
+					return parsedID
+				}
+				return uuid.Nil
+			}(),
 			// Handle integer types safely
 			ProductIncrementer: safeIntFromInterface(result["productIcrementer"]),
-			ProductName:        safeCastString(result["productName"]),
-			ProductPicture:     safeCastString(result["productPicture"]),
-			Description:        safeCastString(result["description"]),
-			IsAvailable:        safeCastBool(result["isAvailable"]),
-			IsCallNeeded:       safeCastBool(result["isCallNeeded"]),
-			ProductCost:        safeCastFloat64(result["productCost"]),
-			DrawPeriod:         safeCastString(result["drawPeriod"]),
-			ProductMargin:      safeCastFloat64(result["product_margin"]),
-			ExpectedAmount:     safeCastFloat64(result["expected_amount"]),
-			NumberOfWinners:    safeIntFromInterface(result["numberOfWinners"]),
-			PlayAmount:         safeCastFloat64(result["playAmount"]),
+			ProductName:        StringPtr(safeCastString(result["productName"])),
+			ProductPicture:     StringPtr(safeCastString(result["productPicture"])),
+			Description:        StringPtr(safeCastString(result["description"])),
+			IsAvailable:        BoolPtr(safeCastBool(result["isAvailable"])),
+			IsCallNeeded:       BoolPtr(safeCastBool(result["isCallNeeded"])),
+			ProductCost:        IntPtr(safeIntFromInterface(result["productCost"])),
+			DrawPeriod:         IntPtr(safeIntFromInterface(result["drawPeriod"])),
+			ProductMargin:      IntPtr(safeIntFromInterface(result["product_margin"])),
+			ExpectedAmount:     IntPtr(safeIntFromInterface(result["expected_amount"])),
+			NumberOfWinners:    IntPtr(safeIntFromInterface(result["numberOfWinners"])),
+			PlayAmount:         IntPtr(safeIntFromInterface(result["playAmount"])),
 			CreatedAt:          result["createdAt"].(time.Time),
 			UpdatedAt:          result["updatedAt"].(time.Time),
 		}
@@ -438,7 +463,7 @@ func (s *TransactionService) GetTransactionsAndTokensByPhoneNumber(phoneNumber s
 func (s *TransactionService) GetMyTokens(phoneNumber string, productID string) (*models.APIResponse, error) {
 	// Query transactions based on phone number and status
 	var transactions []models.Transaction
-	query := s.db.Where("phone_number = ? AND status = ?", phoneNumber, models.StatusSuccess)
+	query := s.db.Where("phone_number = ? AND status = ?", phoneNumber, models.TransactionStatusSuccess)
 	if err := query.Find(&transactions).Error; err != nil {
 		return nil, err
 	}
@@ -503,7 +528,7 @@ func (s *TransactionService) GetMyTokens(phoneNumber string, productID string) (
 func (s *TransactionService) GetTokenStats(phoneNumber string) ([]*models.TokenStats, error) {
 	// Query transactions based on phone number and success status
 	var transactions []models.Transaction
-	if err := s.db.Where("phone_number = ? AND status = ?", phoneNumber, models.StatusSuccess).
+	if err := s.db.Where("phone_number = ? AND status = ?", phoneNumber, models.TransactionStatusSuccess).
 		Preload("Product").
 		Find(&transactions).Error; err != nil {
 		return nil, err
@@ -512,8 +537,8 @@ func (s *TransactionService) GetTokenStats(phoneNumber string) ([]*models.TokenS
 	// Count tokens per product
 	productCounts := make(map[string]int)
 	for _, transaction := range transactions {
-		if transaction.ProductID != "" {
-			productCounts[transaction.ProductID]++
+		if transaction.ProductID.String() != "" {
+			productCounts[transaction.ProductID.String()]++
 		}
 	}
 
@@ -570,8 +595,8 @@ func (s *TransactionService) ResendSms(tokenID string) (map[string]string, error
 	}
 
 	// Compute the draw end dates
-	endDate := playerToken.Draw.EndDate.AddDate(0, 0, 1).Format("2006-01-02")
-	fmt.Printf(endDate)
+	// endDate := playerToken.Draw.EndDate.AddDate(0, 0, 1).Format("2006-01-02")
+	// fmt.Printf(endDate)
 	endDateMill := tokenMillion.Draw.EndDate.AddDate(0, 0, 1).Format("2006-01-02")
 
 	// Construct the SMS message
@@ -642,7 +667,7 @@ func (s *TransactionService) GetTransactionStats(pageSize int, pageNumber int) (
 	query := s.db.Table("\"transactions_new\"").
 		Select("\"phone_number\", COUNT(\"phone_number\") as totalHits, "+
 			"SUM(CASE WHEN \"status\" = ? THEN 1 ELSE 0 END) as totalSuccess",
-			models.StatusSuccess).
+			models.TransactionStatusSuccess).
 		Group("\"phone_number\"").
 		Order("totalHits DESC").
 		Limit(pageSize).
@@ -706,7 +731,7 @@ func (s *TransactionService) GetDailyUserStats(userId string, from string, to st
 	query := s.db.Table("\"transactions_new\"").
 		Select("\"user_id\" AS userID, DATE(\"created_at\" + interval '2 hours') AS date, COUNT(\"id\") AS total_transaction, COALESCE(SUM(\"final_amount\"), 0) AS total_amount"). // ✅ Fix: Use COALESCE() to replace NULL with 0
 		Where("\"user_id\" IS NOT NULL AND \"user_id\" != ''").
-		Where("\"status\" = ?", models.StatusSuccess).
+		Where("\"status\" = ?", models.TransactionStatusSuccess).
 		Group("\"user_id\", DATE(\"created_at\" + interval '2 hours')")
 
 	// Apply filters only if parameters are provided
