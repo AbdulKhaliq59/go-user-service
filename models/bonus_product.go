@@ -6,15 +6,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type BonusProduct struct {
+type ProductBonus struct {
 	ProductID      uuid.UUID `gorm:"column:productId;type:uuid;primaryKey"`
 	BonusProductID uuid.UUID `gorm:"column:bonusProductId;type:uuid;primaryKey"`
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt      time.Time `gorm:"column:createdAt"`
+	UpdatedAt      time.Time `gorm:"column:updatedAt"`
 }
 
-// TableName sets the custom table name for the join table
-func (BonusProduct) TableName() string {
-	return "\"Product_Bonus\""
+func (ProductBonus) TableName() string {
+	return "Product_Bonus"
 }

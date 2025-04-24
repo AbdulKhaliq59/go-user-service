@@ -8,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
 
@@ -48,11 +49,11 @@ func ConnectDatabase() (*gorm.DB, error) {
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   "",    // table name prefix
-			SingularTable: false, // use plural table names (Products instead of Product)
-			NameReplacer:  nil,   // no name replacer
-			NoLowerCase:   true,  // keep original case (important for Product_Bonus)
+			// TablePrefix:   "",
+			// SingularTable: false,
+			NoLowerCase: true,
 		},
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %v", err)

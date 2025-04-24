@@ -31,9 +31,8 @@ func (r *ProductRepository) FindByID(id uuid.UUID) (*models.Product, error) {
 
 func (r *ProductRepository) FindByIDWithBonusProducts(id uuid.UUID) (*models.Product, error) {
 	var product models.Product
-	if err := r.DB.
-		Preload("BonusProducts").
-		Where("productId = ?", id).
+	if err := r.DB.Preload("BonusProducts").
+		Where(`"productId" = ?`, id).
 		First(&product).Error; err != nil {
 		return nil, err
 	}

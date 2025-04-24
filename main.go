@@ -5,8 +5,10 @@ import (
 	"go-user-service/api/routes"
 	"go-user-service/config"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -33,6 +35,15 @@ import (
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("No .env file found or error loading .env")
+	}
+	log.Printf("KEYCLOAK_BASE_URL: %s", os.Getenv("KEYCLOAK_BASE_URL"))
+	log.Printf("KEYCLOAK_REALM: %s", os.Getenv("KEYCLOAK_REALM"))
+	log.Printf("KEYCLOAK_CLIENT_ID: %s", os.Getenv("KEYCLOAK_CLIENT_ID"))
+	log.Printf("KEYCLOAK_CLIENT_SECRET: %s", os.Getenv("KEYCLOAK_CLIENT_SECRET")) // Don't log the actual secret
+
 	// Initialize router
 	router := gin.Default()
 
@@ -57,6 +68,7 @@ func main() {
 		routes.SetupReportRoutes(v1, db)
 		routes.SetupTransactionRoutes(v1, db)
 		routes.SetupProductRoutes(v1, db)
+		routes.SetupRoleRoutes(v1, db)
 	}
 
 	// Swagger documentation route

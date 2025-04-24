@@ -49,6 +49,16 @@ definitions:
     - productCost
     - productName
     type: object
+  dto.CreateRoleDTO:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
   dto.ProductResponse:
     properties:
       data: {}
@@ -63,6 +73,13 @@ definitions:
     properties:
       fileLink:
         example: http://example.com/uploads/image.jpg
+        type: string
+    type: object
+  dto.UpdateRoleDTO:
+    properties:
+      description:
+        type: string
+      name:
         type: string
     type: object
   models.CreateTransactionDto:
@@ -173,6 +190,7 @@ definitions:
       avoidConflict:
         type: boolean
       bonusProducts:
+        description: Self-referencing many-to-many
         items:
           $ref: '#/definitions/models.Product'
         type: array
@@ -184,16 +202,14 @@ definitions:
         type: string
       drawPeriod:
         type: integer
-      draws:
-        description: Relations
-        items:
-          $ref: '#/definitions/models.Draw'
-        type: array
       englishName:
         type: string
       expected_amount:
-        description: Using snake_case as in DB
         type: integer
+      includedInBonusOf:
+        items:
+          $ref: '#/definitions/models.Product'
+        type: array
       isAvailable:
         type: boolean
       isBonus:
@@ -203,15 +219,12 @@ definitions:
       numberOfWinners:
         type: integer
       playAmount:
-        description: Changed from float64 to int4
         type: integer
       priority:
         type: integer
       product_margin:
-        description: Using snake_case as in DB
         type: integer
       productCost:
-        description: Changed from float64 to int4
         type: integer
       productIcrementer:
         type: integer
@@ -225,28 +238,8 @@ definitions:
         items:
           type: integer
         type: array
-      tempWinners:
-        items:
-          $ref: '#/definitions/models.TempWinner'
-        type: array
-      tokenMillions:
-        items:
-          $ref: '#/definitions/models.TokenMillion'
-        type: array
-      tokens:
-        items:
-          $ref: '#/definitions/models.Token'
-        type: array
-      transactions:
-        items:
-          $ref: '#/definitions/models.Transaction'
-        type: array
       updatedAt:
         type: string
-      wonTokens:
-        items:
-          $ref: '#/definitions/models.WonToken'
-        type: array
     type: object
   models.ProductStats:
     properties:
@@ -1057,6 +1050,173 @@ paths:
       summary: Generate weekly report
       tags:
       - Report
+  /api/v1/role:
+    get:
+      consumes:
+      - application/json
+      description: Get a paginated list of all roles
+      parameters:
+      - default: 10
+        description: Page size
+        in: query
+        name: page_size
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page_number
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationResponse'
+        "400":
+          description: 'error: Bad request error message'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'error: Internal server error message'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get all roles
+      tags:
+      - roles
+    post:
+      consumes:
+      - application/json
+      description: Create a new role with the provided information
+      parameters:
+      - description: Role information
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateRoleDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 'message: Role created successfully'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 'error: Bad request error message'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'error: Internal server error message'
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new role
+      tags:
+      - roles
+  /api/v1/role/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a role by its ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Role deleted successfully'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'error: Internal server error message'
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a role
+      tags:
+      - roles
+    get:
+      consumes:
+      - application/json
+      description: Get detailed information about a specific role by its ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Role object
+          schema: {}
+        "404":
+          description: 'message: Role not found'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'error: Internal server error message'
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get a role by ID
+      tags:
+      - roles
+    patch:
+      consumes:
+      - application/json
+      description: Update a role's information by its ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated role information
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateRoleDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'message: Role updated successfully'
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: 'error: Bad request error message'
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: 'error: Internal server error message'
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a role
+      tags:
+      - roles
   /api/v1/transactions:
     get:
       consumes:
