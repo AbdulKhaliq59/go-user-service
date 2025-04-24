@@ -24,6 +24,209 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/group": {
+            "get": {
+                "description": "Get all groups with their roles",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Get all groups",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "pageNumber",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/utils.PaginationResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Create a new group",
+                "parameters": [
+                    {
+                        "description": "Group data",
+                        "name": "group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateGroupDTO"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/group/assign-roles": {
+            "post": {
+                "description": "Assign one or more roles to a group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Assign roles to group",
+                "parameters": [
+                    {
+                        "description": "Role assignment data",
+                        "name": "roles",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AssignRolesToGroupDTO"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/group/unassign-roles": {
+            "post": {
+                "description": "Remove one or more roles from a group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Unassign roles from group",
+                "parameters": [
+                    {
+                        "description": "Role unassignment data",
+                        "name": "roles",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UnassignRoleFromGroupDTO"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/v1/group/{id}": {
+            "get": {
+                "description": "Get a specific group by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Get group by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.GroupResponseDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a group by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Delete a group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "patch": {
+                "description": "Update an existing group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Groups"
+                ],
+                "summary": "Update a group",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated group data",
+                        "name": "group",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateGroupDTO"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/api/v1/product": {
             "get": {
                 "description": "Get a paginated list of products with optional filtering",
@@ -1654,6 +1857,24 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.AssignRolesToGroupDTO": {
+            "type": "object",
+            "required": [
+                "groupId",
+                "roleIds"
+            ],
+            "properties": {
+                "groupId": {
+                    "type": "string"
+                },
+                "roleIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "dto.BonusProductDTO": {
             "type": "object",
             "required": [
@@ -1668,6 +1889,17 @@ const docTemplate = `{
                     "example": [
                         "['string']"
                     ]
+                }
+            }
+        },
+        "dto.CreateGroupDTO": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1741,6 +1973,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.GroupResponseDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.RoleSimple"
+                    }
+                }
+            }
+        },
         "dto.ProductResponse": {
             "type": "object",
             "properties": {
@@ -1761,6 +2010,49 @@ const docTemplate = `{
                 "fileLink": {
                     "type": "string",
                     "example": "http://example.com/uploads/image.jpg"
+                }
+            }
+        },
+        "dto.RoleSimple": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UnassignRoleFromGroupDTO": {
+            "type": "object",
+            "required": [
+                "groupId",
+                "roleIds"
+            ],
+            "properties": {
+                "groupId": {
+                    "type": "string"
+                },
+                "roleIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.UpdateGroupDTO": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
                 }
             }
         },

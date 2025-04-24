@@ -1,4 +1,16 @@
 definitions:
+  dto.AssignRolesToGroupDTO:
+    properties:
+      groupId:
+        type: string
+      roleIds:
+        items:
+          type: string
+        type: array
+    required:
+    - groupId
+    - roleIds
+    type: object
   dto.BonusProductDTO:
     properties:
       bonusProductIds:
@@ -9,6 +21,13 @@ definitions:
         type: array
     required:
     - bonusProductIds
+    type: object
+  dto.CreateGroupDTO:
+    properties:
+      name:
+        type: string
+    required:
+    - name
     type: object
   dto.CreateProductRequest:
     properties:
@@ -59,6 +78,17 @@ definitions:
     - description
     - name
     type: object
+  dto.GroupResponseDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/dto.RoleSimple'
+        type: array
+    type: object
   dto.ProductResponse:
     properties:
       data: {}
@@ -74,6 +104,34 @@ definitions:
       fileLink:
         example: http://example.com/uploads/image.jpg
         type: string
+    type: object
+  dto.RoleSimple:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.UnassignRoleFromGroupDTO:
+    properties:
+      groupId:
+        type: string
+      roleIds:
+        items:
+          type: string
+        type: array
+    required:
+    - groupId
+    - roleIds
+    type: object
+  dto.UpdateGroupDTO:
+    properties:
+      name:
+        type: string
+    required:
+    - name
     type: object
   dto.UpdateRoleDTO:
     properties:
@@ -488,6 +546,142 @@ info:
   title: LONDONWINNER
   version: "1.0"
 paths:
+  /api/v1/group:
+    get:
+      consumes:
+      - application/json
+      description: Get all groups with their roles
+      parameters:
+      - description: Page number
+        in: query
+        name: pageNumber
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationResponse'
+      summary: Get all groups
+      tags:
+      - Groups
+    post:
+      consumes:
+      - application/json
+      description: Create a new group
+      parameters:
+      - description: Group data
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateGroupDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: Create a new group
+      tags:
+      - Groups
+  /api/v1/group/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a group by ID
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Delete a group
+      tags:
+      - Groups
+    get:
+      consumes:
+      - application/json
+      description: Get a specific group by its ID
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GroupResponseDTO'
+      summary: Get group by ID
+      tags:
+      - Groups
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing group
+      parameters:
+      - description: Group ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated group data
+        in: body
+        name: group
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateGroupDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: Update a group
+      tags:
+      - Groups
+  /api/v1/group/assign-roles:
+    post:
+      consumes:
+      - application/json
+      description: Assign one or more roles to a group
+      parameters:
+      - description: Role assignment data
+        in: body
+        name: roles
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignRolesToGroupDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: Assign roles to group
+      tags:
+      - Groups
+  /api/v1/group/unassign-roles:
+    post:
+      consumes:
+      - application/json
+      description: Remove one or more roles from a group
+      parameters:
+      - description: Role unassignment data
+        in: body
+        name: roles
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UnassignRoleFromGroupDTO'
+      produces:
+      - application/json
+      responses: {}
+      summary: Unassign roles from group
+      tags:
+      - Groups
   /api/v1/product:
     get:
       consumes:

@@ -69,6 +69,7 @@ func main() {
 		routes.SetupTransactionRoutes(v1, db)
 		routes.SetupProductRoutes(v1, db)
 		routes.SetupRoleRoutes(v1, db)
+		routes.SetupGroupRoutes(v1, db)
 	}
 
 	// Swagger documentation route
