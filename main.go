@@ -4,9 +4,11 @@ package main
 import (
 	"go-user-service/api/routes"
 	"go-user-service/config"
+	"go-user-service/services"
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
@@ -47,10 +49,16 @@ func main() {
 	// Initialize router
 	router := gin.Default()
 
+	router.Use(cors.Default())
+
 	// Connect to database
 	db, err := config.ConnectDatabase()
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	keycloakService, err := services.NewKeycloakService()
+	if err != nil {
+		log.Fatalf("Failed to initialize Keycloak service: %v", err)
 	}
 
 	// Get the SQL DB object
@@ -70,6 +78,7 @@ func main() {
 		routes.SetupProductRoutes(v1, db)
 		routes.SetupRoleRoutes(v1, db)
 		routes.SetupGroupRoutes(v1, db)
+		routes.SetupUserRoutes(v1, keycloakService)
 	}
 
 	// Swagger documentation route

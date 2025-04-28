@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"go-user-service/api/dto"
 
@@ -22,62 +21,31 @@ type GroupService struct {
 
 // NewGroupService creates a new group service with validation
 func NewGroupService() *GroupService {
-	// Debug: Print all Keycloak-related environment variables
-	log.Println("Loading Keycloak configuration for group service...")
-	baseURL := os.Getenv("KEYCLOAK_BASE_URL")
-	realm := os.Getenv("KEYCLOAK_REALM")
-	clientID := os.Getenv("KEYCLOAK_CLIENT_ID")
-	clientSecret := os.Getenv("KEYCLOAK_CLIENT_SECRET")
-
-	// Validate required values
-	if baseURL == "" {
-		log.Fatal("KEYCLOAK_BASE_URL is not set")
-	}
-	if realm == "" {
-		log.Fatal("KEYCLOAK_REALM is not set")
-	}
-	if clientID == "" {
-		log.Fatal("KEYCLOAK_CLIENT_ID is not set")
-	}
-	if clientSecret == "" {
-		log.Fatal("KEYCLOAK_CLIENT_SECRET is not set")
-	}
-
-	// Ensure base URL has a protocol
-	if !strings.HasPrefix(baseURL, "http://") && !strings.HasPrefix(baseURL, "https://") {
-		baseURL = "https://" + baseURL
-		log.Printf("Added https:// prefix to Keycloak base URL: %s", baseURL)
-	}
-
 	return &GroupService{
-		keycloakBaseURL: strings.TrimSuffix(baseURL, "/"), // Remove trailing slash if present
-		realm:           realm,
-		clientID:        clientID,
-		clientSecret:    clientSecret,
+		keycloakBaseURL: os.Getenv("KEYCLOAK_BASE_URL"),
+		realm:           os.Getenv("KEYCLOAK_REALM"),
+		clientID:        os.Getenv("KEYCLOAK_CLIENT_ID"),
+		clientSecret:    os.Getenv("KEYCLOAK_CLIENT_SECRET"),
 	}
 }
 
-// createKeycloakAdminClient creates a new admin client and gets a fresh token
-func (s *GroupService) createKeycloakAdminClient(ctx context.Context) (*gocloak.GoCloak, string, error) {
-	// Ensure the base URL doesn't end with a trailing slash
-	baseURL := strings.TrimSuffix(s.keycloakBaseURL, "/")
+// CreateKeycloakAdminClient creates and authenticates a new Keycloak admin client
+func (s *GroupService) CreateKeycloakAdminClient() (*gocloak.GoCloak, string, error) {
+	client := gocloak.NewClient(s.keycloakBaseURL)
 
-	// Create client with the sanitized base URL
-	client := gocloak.NewClient(baseURL)
-
-	// Get a fresh token
+	// Authenticate as admin
+	ctx := context.Background()
 	token, err := client.LoginClient(ctx, s.clientID, s.clientSecret, s.realm)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to authenticate with Keycloak: %w", err)
+		return nil, "", fmt.Errorf("failed to login to Keycloak: %w", err)
 	}
 
-	log.Printf("Successfully authenticated with Keycloak")
 	return client, token.AccessToken, nil
 }
 
 // GetGroups fetches all groups from Keycloak
 func (s *GroupService) GetGroups(ctx context.Context) ([]*gocloak.Group, error) {
-	client, token, err := s.createKeycloakAdminClient(ctx)
+	client, token, err := s.CreateKeycloakAdminClient()
 	if err != nil {
 		log.Printf("Error creating Keycloak admin client: %v", err)
 		return nil, err
@@ -101,7 +69,7 @@ func (s *GroupService) GetGroups(ctx context.Context) ([]*gocloak.Group, error) 
 func (s *GroupService) GetGroupById(ctx context.Context, id string) (*gocloak.Group, error) {
 	fmt.Printf("Finding group with ID: %s\n", id)
 
-	client, token, err := s.createKeycloakAdminClient(ctx)
+	client, token, err := s.CreateKeycloakAdminClient()
 	if err != nil {
 		return nil, err
 	}
@@ -115,16 +83,16 @@ func (s *GroupService) GetGroupById(ctx context.Context, id string) (*gocloak.Gr
 }
 
 // GetGroupRoles fetches all roles assigned to a group
-func (s *GroupService) GetGroupRoles(ctx context.Context, groupID string) ([]*gocloak.Role, error) {
-	client, token, err := s.createKeycloakAdminClient(ctx)
+func (s *GroupService) GetGroupRoles(groupID string) ([]*gocloak.Role, error) {
+	client, token, err := s.CreateKeycloakAdminClient()
 	if err != nil {
 		return nil, err
 	}
 
-	// Get all realm roles assigned to the group
+	ctx := context.Background()
 	roles, err := client.GetRealmRolesByGroupID(ctx, token, s.realm, groupID)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching roles for group ID '%s': %w", groupID, err)
+		return nil, fmt.Errorf("failed to get group roles: %w", err)
 	}
 
 	return roles, nil
@@ -132,7 +100,7 @@ func (s *GroupService) GetGroupRoles(ctx context.Context, groupID string) ([]*go
 
 // CreateGroup creates a new group
 func (s *GroupService) CreateGroup(ctx context.Context, createGroupDto dto.CreateGroupDTO) error {
-	client, token, err := s.createKeycloakAdminClient(ctx)
+	client, token, err := s.CreateKeycloakAdminClient()
 	if err != nil {
 		return err
 	}
@@ -161,7 +129,7 @@ func (s *GroupService) UpdateGroup(ctx context.Context, id string, updateGroupDt
 		return fmt.Errorf("error finding group: %w", err)
 	}
 
-	client, token, err := s.createKeycloakAdminClient(ctx)
+	client, token, err := s.CreateKeycloakAdminClient()
 	if err != nil {
 		log.Printf("Error creating Keycloak admin client: %v", err)
 		return err
@@ -190,7 +158,7 @@ func (s *GroupService) UpdateGroup(ctx context.Context, id string, updateGroupDt
 func (s *GroupService) DeleteGroup(ctx context.Context, id string) error {
 	log.Printf("Attempting to delete group with ID: %s", id)
 
-	client, token, err := s.createKeycloakAdminClient(ctx)
+	client, token, err := s.CreateKeycloakAdminClient()
 	if err != nil {
 		log.Printf("Error creating Keycloak admin client: %v", err)
 		return err
@@ -209,7 +177,7 @@ func (s *GroupService) DeleteGroup(ctx context.Context, id string) error {
 
 // AssignRolesToGroup assigns roles to a group
 func (s *GroupService) AssignRolesToGroup(ctx context.Context, assignRolesDto dto.AssignRolesToGroupDTO) error {
-	client, token, err := s.createKeycloakAdminClient(ctx)
+	client, token, err := s.CreateKeycloakAdminClient()
 	if err != nil {
 		return err
 	}
@@ -262,7 +230,7 @@ func (s *GroupService) AssignRolesToGroup(ctx context.Context, assignRolesDto dt
 
 // UnassignRoleFromGroup removes a role from a group
 func (s *GroupService) UnassignRoleFromGroup(ctx context.Context, unassignRoleDto dto.UnassignRoleFromGroupDTO) error {
-	client, token, err := s.createKeycloakAdminClient(ctx)
+	client, token, err := s.CreateKeycloakAdminClient()
 	if err != nil {
 		return err
 	}
@@ -340,7 +308,7 @@ func (s *GroupService) GetGroupsAndRoles(ctx context.Context) (map[string][]*goc
 
 	// For each group, get its roles
 	for _, group := range groups {
-		roles, err := s.GetGroupRoles(ctx, *group.ID)
+		roles, err := s.GetGroupRoles(*group.ID)
 		if err != nil {
 			log.Printf("Warning: Failed to fetch roles for group '%s': %v", *group.Name, err)
 			groupRolesMap[*group.Name] = []*gocloak.Role{}
@@ -350,4 +318,19 @@ func (s *GroupService) GetGroupsAndRoles(ctx context.Context) (map[string][]*goc
 	}
 
 	return groupRolesMap, nil
+}
+
+func (s *GroupService) FindById(groupID string) (*gocloak.Group, error) {
+	client, token, err := s.CreateKeycloakAdminClient()
+	if err != nil {
+		return nil, err
+	}
+
+	ctx := context.Background()
+	group, err := client.GetGroup(ctx, token, s.realm, groupID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get group by ID: %w", err)
+	}
+
+	return group, nil
 }

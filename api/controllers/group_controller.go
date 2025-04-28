@@ -58,7 +58,7 @@ func (c *GroupController) GetGroups(ctx *gin.Context) {
 	var groupDTOs []dto.GroupResponseDTO
 	for _, group := range groups {
 		// Get roles for this group
-		roles, err := c.groupService.GetGroupRoles(ctx, *group.ID)
+		roles, err := c.groupService.GetGroupRoles(*group.ID)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch roles for group: " + err.Error()})
 			return
@@ -129,7 +129,7 @@ func (c *GroupController) GetGroupByID(ctx *gin.Context) {
 	}
 
 	// Get roles for this group
-	roles, err := c.groupService.GetGroupRoles(ctx, *group.ID)
+	roles, err := c.groupService.GetGroupRoles(*group.ID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch roles for group: " + err.Error()})
 		return

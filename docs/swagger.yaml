@@ -11,6 +11,16 @@ definitions:
     - groupId
     - roleIds
     type: object
+  dto.AssignUserToGroupDto:
+    properties:
+      groupId:
+        type: string
+      userId:
+        type: string
+    required:
+    - groupId
+    - userId
+    type: object
   dto.BonusProductDTO:
     properties:
       bonusProductIds:
@@ -78,6 +88,28 @@ definitions:
     - description
     - name
     type: object
+  dto.CreateUserDto:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+      phoneNumber:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - firstName
+    - lastName
+    - password
+    - phoneNumber
+    - username
+    type: object
   dto.GroupResponseDTO:
     properties:
       id:
@@ -88,6 +120,28 @@ definitions:
         items:
           $ref: '#/definitions/dto.RoleSimple'
         type: array
+    type: object
+  dto.LoginDto:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dto.LogoutDto:
+    properties:
+      refreshToken:
+        properties:
+          token:
+            type: string
+        required:
+        - token
+        type: object
+    required:
+    - refreshToken
     type: object
   dto.ProductResponse:
     properties:
@@ -104,6 +158,14 @@ definitions:
       fileLink:
         example: http://example.com/uploads/image.jpg
         type: string
+    type: object
+  dto.ResetPasswordDto:
+    properties:
+      password:
+        minLength: 8
+        type: string
+    required:
+    - password
     type: object
   dto.RoleSimple:
     properties:
@@ -126,6 +188,29 @@ definitions:
     - groupId
     - roleIds
     type: object
+  dto.UnassignUserFromGroupDto:
+    properties:
+      groupId:
+        type: string
+      userId:
+        type: string
+    required:
+    - groupId
+    - userId
+    type: object
+  dto.UnassignUserFromGroupsDto:
+    properties:
+      groupIds:
+        items:
+          type: string
+        minItems: 1
+        type: array
+      userId:
+        type: string
+    required:
+    - groupIds
+    - userId
+    type: object
   dto.UpdateGroupDTO:
     properties:
       name:
@@ -139,6 +224,47 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  dto.UpdateUserDto:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      phoneNumber:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - firstName
+    - lastName
+    - phoneNumber
+    - username
+    type: object
+  dto.UserDto:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+      phoneNumber:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - firstName
+    - lastName
+    - password
+    - phoneNumber
+    - username
     type: object
   models.CreateTransactionDto:
     properties:
@@ -309,6 +435,16 @@ definitions:
         $ref: '#/definitions/models.Product'
       totalamount:
         type: number
+    type: object
+  models.Response:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: integer
+      timestamp:
+        type: string
     type: object
   models.Telco:
     enum:
@@ -1761,6 +1897,501 @@ paths:
       summary: Resend Token SMS
       tags:
       - Transaction
+  /api/v1/user:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a paginated list of all users with their associated groups
+        and roles
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: pageNumber
+        type: integer
+      - default: 10
+        description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/utils.PaginationResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: Get all users with their groups and roles
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user in Keycloak
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create new user
+      tags:
+      - User
+  /api/v1/user/{id}:
+    delete:
+      description: Deletes a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: Delete a user
+      tags:
+      - User
+    get:
+      description: Retrieves a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get user by ID
+      tags:
+      - User
+    patch:
+      consumes:
+      - application/json
+      description: Updates an existing user's information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated user details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: Update user information
+      tags:
+      - User
+  /api/v1/user/{id}/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Resets a user's password
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New password
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ResetPasswordDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: Reset user password
+      tags:
+      - User
+  /api/v1/user/check:
+    get:
+      description: Returns user information if authenticated
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: Check authentication status
+      tags:
+      - User
+  /api/v1/user/group:
+    post:
+      consumes:
+      - application/json
+      description: Assigns a user to a specified group
+      parameters:
+      - description: User-Group assignment details
+        in: body
+        name: assignment
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignUserToGroupDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: Assign user to a group
+      tags:
+      - User
+  /api/v1/user/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user and returns an access token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: User login
+      tags:
+      - User
+  /api/v1/user/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs out a user by revoking their refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: logout
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LogoutDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: User logout
+      tags:
+      - User
+  /api/v1/user/signup:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new standard user in Keycloak
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create new standard user
+      tags:
+      - User
+  /api/v1/user/signup/player:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new player user in Keycloak and assigns player role
+      parameters:
+      - description: Player user details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create new player user
+      tags:
+      - User
+  /api/v1/user/unassign-group:
+    post:
+      consumes:
+      - application/json
+      description: Removes a user from a specified group
+      parameters:
+      - description: User-Group unassignment details
+        in: body
+        name: unassignment
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UnassignUserFromGroupDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: Unassign user from a group
+      tags:
+      - User
+  /api/v1/user/unassign-groups:
+    post:
+      consumes:
+      - application/json
+      description: Removes a user from multiple specified groups
+      parameters:
+      - description: User-Groups unassignment details
+        in: body
+        name: unassignment
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UnassignUserFromGroupsDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
+      summary: Unassign user from multiple groups
+      tags:
+      - User
 securityDefinitions:
   Bearer:
     description: Type "Bearer" followed by a space and JWT token

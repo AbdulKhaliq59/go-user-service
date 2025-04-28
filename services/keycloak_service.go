@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -14,11 +15,14 @@ type KeycloakService struct {
 	realm        string
 	clientID     string
 	clientSecret string
+	baseURL      string
+	groupService *GroupService
 }
 
 // NewKeycloakService initializes Keycloak client and logs in
 func NewKeycloakService() (*KeycloakService, error) {
-	client := gocloak.NewClient(os.Getenv("KEYCLOAK_BASE_URL"))
+	baseURL := os.Getenv("KEYCLOAK_BASE_URL")
+	client := gocloak.NewClient(baseURL)
 	realm := os.Getenv("KEYCLOAK_REALM")
 	clientID := os.Getenv("KEYCLOAK_CLIENT_ID")
 	clientSecret := os.Getenv("KEYCLOAK_CLIENT_SECRET")
@@ -30,12 +34,16 @@ func NewKeycloakService() (*KeycloakService, error) {
 		return nil, fmt.Errorf("failed to authenticate Keycloak client: %w", err)
 	}
 
+	groupService := NewGroupService()
+
 	return &KeycloakService{
 		client:       client,
 		token:        token,
 		realm:        realm,
 		clientID:     clientID,
 		clientSecret: clientSecret,
+		baseURL:      baseURL,
+		groupService: groupService,
 	}, nil
 }
 
@@ -47,4 +55,20 @@ func (k *KeycloakService) GetUserDetails(userID string) (*gocloak.User, error) {
 		return nil, fmt.Errorf("failed to fetch user details from Keycloak: %w", err)
 	}
 	return user, nil
+}
+
+// RefreshAdminToken refreshes the admin token if needed
+func (k *KeycloakService) RefreshAdminToken() error {
+	ctx := context.TODO()
+	token, err := k.client.LoginClient(ctx, k.clientID, k.clientSecret, k.realm)
+	if err != nil {
+		return fmt.Errorf("failed to refresh Keycloak admin token: %w", err)
+	}
+	k.token = token
+	return nil
+}
+
+// GetPublicKey fetches the public key from Keycloak
+func (k *KeycloakService) GetPublicKey() (interface{}, error) {
+	return nil, errors.New("Method not implemented")
 }

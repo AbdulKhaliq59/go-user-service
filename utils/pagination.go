@@ -4,6 +4,7 @@ import (
 	"go-user-service/models"
 	"math"
 	"sort"
+	"time"
 )
 
 type PaginationQuery struct {
@@ -68,4 +69,37 @@ func SortProductStatsByPercentage(stats []models.ProductStats) {
 	sort.Slice(stats, func(i, j int) bool {
 		return stats[i].Percentage > stats[j].Percentage
 	})
+}
+
+func GetPaginationOffset(pageNumber, pageSize int) int {
+	return (pageNumber - 1) * pageSize
+}
+
+// GetPaginationLimit calculates the ending index for pagination
+func GetPaginationLimit(pageNumber, pageSize, total int) int {
+	end := GetPaginationOffset(pageNumber, pageSize) + pageSize
+	if end > total {
+		return total
+	}
+	return end
+}
+
+// PaginationHelper provides pagination functionality
+type PaginationHelper struct{}
+
+func NewPaginationHelper() *PaginationHelper {
+	return &PaginationHelper{}
+}
+
+// Paginate applies pagination to a slice of data
+func (p *PaginationHelper) Paginate(data interface{}, pageNumber, pageSize int, total int64) PaginationResponse {
+	query := PaginationQuery{
+		PageNumber: pageNumber,
+		PageSize:   pageSize,
+	}
+	return CreatePaginationResponse(data, total, query)
+}
+
+func GetFormattedTimestamp() string {
+	return time.Now().Format("2006-01-02T15:04:05Z07:00")
 }
