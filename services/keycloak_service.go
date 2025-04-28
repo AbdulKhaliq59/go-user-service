@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/Nerzal/gocloak/v13"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type KeycloakService struct {
@@ -17,6 +18,25 @@ type KeycloakService struct {
 	clientSecret string
 	baseURL      string
 	groupService *GroupService
+}
+
+type KeycloakClaims struct {
+	jwt.RegisteredClaims
+	EmailVerified  bool             `json:"email_verified"`
+	PreferredName  string           `json:"preferred_username"`
+	GivenName      string           `json:"given_name"`
+	FamilyName     string           `json:"family_name"`
+	Email          string           `json:"email"`
+	RealmAccess    RealmAccess      `json:"realm_access"`
+	ResourceAccess map[string]Roles `json:"resource_access"`
+}
+
+type RealmAccess struct {
+	Roles []string `json:"roles"`
+}
+
+type Roles struct {
+	Roles []string `json:"roles"`
 }
 
 // NewKeycloakService initializes Keycloak client and logs in
@@ -71,4 +91,24 @@ func (k *KeycloakService) RefreshAdminToken() error {
 // GetPublicKey fetches the public key from Keycloak
 func (k *KeycloakService) GetPublicKey() (interface{}, error) {
 	return nil, errors.New("Method not implemented")
+}
+
+func (kc *KeycloakClaims) HasRole(role string) bool {
+	// Check realm roles
+	for _, r := range kc.RealmAccess.Roles {
+		if r == role {
+			return true
+		}
+	}
+
+	// Check client-specific roles
+	for _, roles := range kc.ResourceAccess {
+		for _, r := range roles.Roles {
+			if r == role {
+				return true
+			}
+		}
+	}
+
+	return false
 }

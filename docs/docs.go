@@ -2190,6 +2190,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Creates a new user in Keycloak",
                 "consumes": [
                     "application/json"

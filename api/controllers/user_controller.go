@@ -77,6 +77,7 @@ func (c *UserController) Login(ctx *gin.Context) {
 // @Failure 409 {object} models.Response
 // @Failure 500 {object} models.Response
 // @Router /api/v1/user [post]
+// @Security Bearer
 func (c *UserController) CreateUser(ctx *gin.Context) {
 	var createUserDto dto.CreateUserDto
 	if err := ctx.ShouldBindJSON(&createUserDto); err != nil {

@@ -2159,6 +2159,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.Response'
+      security:
+      - Bearer: []
       summary: Create new user
       tags:
       - User

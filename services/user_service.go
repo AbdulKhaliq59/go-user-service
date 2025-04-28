@@ -14,7 +14,6 @@ import (
 	"go-user-service/models"
 
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthService struct {
@@ -25,15 +24,6 @@ func NewAuthService(keycloakService *KeycloakService) *AuthService {
 	return &AuthService{
 		keycloakService: keycloakService,
 	}
-}
-
-type KeycloakClaims struct {
-	jwt.RegisteredClaims
-	EmailVerified bool   `json:"email_verified"`
-	PreferredName string `json:"preferred_username"`
-	GivenName     string `json:"given_name"`
-	FamilyName    string `json:"family_name"`
-	Email         string `json:"email"`
 }
 
 func (s *AuthService) Login(username, password string) (*models.Response, error) {
