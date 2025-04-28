@@ -32,6 +32,16 @@ definitions:
     required:
     - bonusProductIds
     type: object
+  dto.CreateBlacklistDto:
+    properties:
+      name:
+        type: string
+      phoneNumber:
+        type: string
+    required:
+    - name
+    - phoneNumber
+    type: object
   dto.CreateGroupDTO:
     properties:
       name:
@@ -210,6 +220,13 @@ definitions:
     required:
     - groupIds
     - userId
+    type: object
+  dto.UpdateBlacklistDto:
+    properties:
+      name:
+        type: string
+      phoneNumber:
+        type: string
     type: object
   dto.UpdateGroupDTO:
     properties:
@@ -682,6 +699,184 @@ info:
   title: LONDONWINNER
   version: "1.0"
 paths:
+  /api/v1/blacklist:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all blacklist entries with pagination
+      parameters:
+      - description: Page number
+        in: query
+        name: pageNumber
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get blacklist entries
+      tags:
+      - Blacklist
+    post:
+      consumes:
+      - application/json
+      description: Adds a new entry to the blacklist
+      parameters:
+      - description: Blacklist entry details
+        in: body
+        name: blacklist
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateBlacklistDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new blacklist entry
+      tags:
+      - Blacklist
+  /api/v1/blacklist/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a blacklist entry by its ID
+      parameters:
+      - description: Blacklist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete blacklist entry
+      tags:
+      - Blacklist
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a blacklist entry by its ID
+      parameters:
+      - description: Blacklist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Get blacklist entry by ID
+      tags:
+      - Blacklist
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing blacklist entry
+      parameters:
+      - description: Blacklist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated blacklist details
+        in: body
+        name: blacklist
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateBlacklistDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Update blacklist entry
+      tags:
+      - Blacklist
   /api/v1/group:
     get:
       consumes:

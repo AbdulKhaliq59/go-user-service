@@ -79,6 +79,7 @@ func main() {
 		routes.SetupRoleRoutes(v1, db)
 		routes.SetupGroupRoutes(v1, db)
 		routes.SetupUserRoutes(v1, keycloakService)
+		routes.SetupBlacklistRoutes(v1, db)
 	}
 
 	// Swagger documentation route
